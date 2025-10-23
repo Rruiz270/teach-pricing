@@ -1,0 +1,11 @@
+{
+  "name": "teach-pricing-calculator",
+  "version": 2,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/next"
+    }
+  ],
+  "regions": ["gru1"]
+}
