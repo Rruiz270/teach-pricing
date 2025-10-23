@@ -78,32 +78,44 @@ export default function PricingCalculator() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-better-white via-gray-50 to-better-azure/10 p-4">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            TEACH Platform - Calculadora de Preços
-          </h1>
-          <p className="text-lg text-gray-600">
-            Configure sua proposta comercial para cursos de IA para educadores
-          </p>
-          <div className="flex items-center justify-center mt-4 text-sm text-gray-500">
-            <Award className="w-4 h-4 mr-1" />
-            Produto Better Tech
+        {/* Header with Better Tech Branding */}
+        <div className="text-center mb-12">
+          <div className="bg-better-black text-better-white p-8 rounded-2xl shadow-2xl mb-8 relative overflow-hidden">
+            {/* Accent gradient */}
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-better-azure via-better-green to-better-azure"></div>
+            <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-better-green via-better-azure to-better-green"></div>
+            
+            <div className="relative z-10">
+              <div className="flex items-center justify-center mb-4">
+                <Award className="w-8 h-8 mr-3 text-better-azure" />
+                <span className="text-2xl font-bold text-better-azure">BETTER TECH</span>
+              </div>
+              <h1 className="text-4xl font-bold mb-3">
+                TEACH Platform - Calculadora de Preços
+              </h1>
+              <p className="text-lg text-better-white/80 mb-4">
+                Configure sua proposta comercial para cursos de IA para educadores
+              </p>
+              <div className="inline-flex items-center px-4 py-2 bg-better-azure/20 rounded-full text-better-azure text-sm font-medium">
+                <BookOpen className="w-4 h-4 mr-2" />
+                Inovação em Educação
+              </div>
+            </div>
           </div>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Course Models */}
           <div className="lg:col-span-2 space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BookOpen className="w-5 h-5" />
+            <Card className="shadow-lg border-better-gray/20 bg-gradient-to-br from-better-white to-gray-50/50">
+              <CardHeader className="bg-gradient-to-r from-better-azure/10 to-better-green/5 rounded-t-lg">
+                <CardTitle className="flex items-center gap-2 text-better-black">
+                  <BookOpen className="w-5 h-5 text-better-azure" />
                   Modalidades de Curso
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-better-gray">
                   Selecione o modelo de curso que melhor atende às necessidades do cliente
                 </CardDescription>
               </CardHeader>
@@ -111,10 +123,10 @@ export default function PricingCalculator() {
                 {courseModels.map((model) => (
                   <div
                     key={model.id}
-                    className={`p-4 rounded-lg border-2 transition-all ${
+                    className={`p-6 rounded-xl border-2 transition-all duration-300 shadow-md hover:shadow-lg ${
                       selectedModel.id === model.id
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300'
+                        ? 'border-better-azure bg-gradient-to-br from-better-azure/10 to-better-green/5 shadow-lg scale-105'
+                        : 'border-better-gray/30 hover:border-better-azure/50 bg-better-white hover:bg-gradient-to-br hover:from-better-azure/5 hover:to-transparent'
                     }`}
                   >
                     <div 
@@ -124,18 +136,21 @@ export default function PricingCalculator() {
                         setExtraFeatures({})
                       }}
                     >
-                      <h3 className="font-semibold text-lg mb-2">{model.name}</h3>
-                      <p className="text-sm text-gray-600 mb-3">{model.description}</p>
+                      <h3 className="font-bold text-xl mb-3 text-better-black">{model.name}</h3>
+                      <p className="text-sm text-better-gray mb-4 leading-relaxed">{model.description}</p>
                     </div>
                     
-                    <div className="space-y-1">
+                    <div className="space-y-2">
                       {model.features.slice(0, 3).map((feature, idx) => (
-                        <div key={idx} className="text-xs text-gray-500">• {feature}</div>
+                        <div key={idx} className="text-xs text-better-gray flex items-start">
+                          <span className="text-better-green mr-2 mt-0.5">✓</span>
+                          {feature}
+                        </div>
                       ))}
                       
                       {model.features.length > 3 && (
                         <Collapsible open={expandedFeatures[model.id]} onOpenChange={() => toggleFeatureExpansion(model.id)}>
-                          <CollapsibleTrigger className="flex items-center text-xs text-blue-500 hover:text-blue-700 transition-colors mt-2">
+                          <CollapsibleTrigger className="flex items-center text-xs text-better-azure hover:text-better-green transition-colors mt-3 font-medium">
                             <span>+{model.features.length - 3} recursos</span>
                             {expandedFeatures[model.id] ? (
                               <ChevronUp className="w-3 h-3 ml-1" />
@@ -143,9 +158,12 @@ export default function PricingCalculator() {
                               <ChevronDown className="w-3 h-3 ml-1" />
                             )}
                           </CollapsibleTrigger>
-                          <CollapsibleContent className="mt-2 space-y-1">
+                          <CollapsibleContent className="mt-2 space-y-2">
                             {model.features.slice(3).map((feature, idx) => (
-                              <div key={idx + 3} className="text-xs text-gray-500">• {feature}</div>
+                              <div key={idx + 3} className="text-xs text-better-gray flex items-start">
+                                <span className="text-better-green mr-2 mt-0.5">✓</span>
+                                {feature}
+                              </div>
                             ))}
                           </CollapsibleContent>
                         </Collapsible>
@@ -157,10 +175,10 @@ export default function PricingCalculator() {
             </Card>
 
             {/* Student Count */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="w-5 h-5" />
+            <Card className="shadow-lg border-better-gray/20 bg-gradient-to-br from-better-white to-gray-50/50">
+              <CardHeader className="bg-gradient-to-r from-better-green/10 to-better-azure/5 rounded-t-lg">
+                <CardTitle className="flex items-center gap-2 text-better-black">
+                  <Users className="w-5 h-5 text-better-green" />
                   Número de Professores
                 </CardTitle>
               </CardHeader>
@@ -232,20 +250,21 @@ export default function PricingCalculator() {
           {/* Pricing Summary & Proposal */}
           <div className="space-y-4">
             {/* Pricing Card */}
-            <Card className="sticky top-4">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calculator className="w-5 h-5" />
+            <Card className="sticky top-4 shadow-xl border-better-azure/30 bg-gradient-to-br from-better-white via-better-azure/5 to-better-green/5">
+              <CardHeader className="bg-gradient-to-r from-better-azure/15 to-better-green/10 rounded-t-lg">
+                <CardTitle className="flex items-center gap-2 text-better-black">
+                  <Calculator className="w-5 h-5 text-better-azure" />
                   Resumo do Investimento
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-600">
+              <CardContent className="space-y-6">
+                <div className="bg-gradient-to-br from-better-black to-better-gray p-6 rounded-xl relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-better-azure to-better-green"></div>
+                  <div className="text-center relative z-10">
+                    <div className="text-3xl font-bold text-better-azure mb-2">
                       {formatCurrency(pricing.totalPrice)}
                     </div>
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-better-white/80">
                       Investimento mensal total
                     </div>
                   </div>
@@ -355,7 +374,10 @@ export default function PricingCalculator() {
                     placeholder="Ex: (11) 99999-9999"
                   />
                 </div>
-                <Button onClick={generateProposal} className="w-full">
+                <Button 
+                  onClick={generateProposal} 
+                  className="w-full bg-gradient-to-r from-better-green to-better-azure hover:from-better-azure hover:to-better-green text-better-black font-bold py-3 transition-all duration-300 shadow-lg hover:shadow-xl"
+                >
                   <FileText className="w-4 h-4 mr-2" />
                   Gerar Proposta PDF
                 </Button>

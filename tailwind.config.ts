@@ -34,6 +34,13 @@ const config: Config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        better: {
+          azure: "hsl(var(--better-pale-azure))",
+          black: "hsl(var(--better-rich-black))",
+          gray: "hsl(var(--better-gray))",
+          white: "hsl(var(--better-baby-powder))",
+          green: "hsl(var(--better-yellow-green))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
