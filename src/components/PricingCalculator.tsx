@@ -6,9 +6,11 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Slider } from '@/components/ui/slider'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { courseModels, calculatePrice, type CourseModel } from '@/lib/pricing-models'
 import { formatCurrency, formatNumber } from '@/lib/utils'
-import { Calculator, Download, Users, BookOpen, Award, Clock } from 'lucide-react'
+import { generateProposalPDF } from '@/lib/pdf-generator'
+import { Calculator, Download, Users, BookOpen, Award, Clock, ChevronDown, ChevronUp, FileText } from 'lucide-react'
 
 interface ProposalInfo {
   clientName: string
@@ -24,6 +26,7 @@ export default function PricingCalculator() {
   const [selectedModel, setSelectedModel] = useState<CourseModel>(courseModels[0])
   const [studentCount, setStudentCount] = useState<number>(100)
   const [extraFeatures, setExtraFeatures] = useState<{ [key: string]: number }>({})
+  const [expandedFeatures, setExpandedFeatures] = useState<{ [key: string]: boolean }>({})
   const [proposalInfo, setProposalInfo] = useState<ProposalInfo>({
     clientName: '',
     schoolName: '',
@@ -50,97 +53,28 @@ export default function PricingCalculator() {
   }
 
   const generateProposal = () => {
-    const proposalContent = `
-# PROPOSTA COMERCIAL - TEACH PLATFORM
+    const proposalData = {
+      clientName: proposalInfo.clientName,
+      schoolName: proposalInfo.schoolName,
+      cityState: proposalInfo.cityState,
+      projectName: proposalInfo.projectName,
+      contactPerson: proposalInfo.contactPerson,
+      email: proposalInfo.email,
+      phone: proposalInfo.phone,
+      selectedModel,
+      studentCount,
+      pricing,
+      extraFeatures
+    };
 
-## Dados do Cliente
-**Cliente:** ${proposalInfo.clientName || '[Nome do Cliente]'}
-**Instituição:** ${proposalInfo.schoolName || '[Nome da Escola]'}
-**Localização:** ${proposalInfo.cityState || '[Cidade/Estado]'}
-**Projeto:** ${proposalInfo.projectName || '[Nome do Projeto]'}
+    generateProposalPDF(proposalData);
+  }
 
-**Contato:** ${proposalInfo.contactPerson || '[Pessoa de Contato]'}
-**E-mail:** ${proposalInfo.email || '[email@exemplo.com]'}
-**Telefone:** ${proposalInfo.phone || '[Telefone]'}
-
----
-
-## MODALIDADE SELECIONADA: ${selectedModel.name}
-
-### Descrição do Curso
-${selectedModel.description}
-
-### Características Incluídas:
-${selectedModel.features.map(feature => `• ${feature}`).join('\n')}
-
----
-
-## DETALHAMENTO FINANCEIRO
-
-**Número de Professores:** ${formatNumber(studentCount)}
-**Faixa de Preço:** ${pricing.tier?.minStudents} a ${pricing.tier?.maxStudents || '+'} professores
-**Valor por Professor:** ${formatCurrency(pricing.tier?.pricePerStudent || 0)}
-
-### Investimento Base
-**Valor Mensal Base:** ${formatCurrency(pricing.basePrice)}
-
-${Object.keys(extraFeatures).length > 0 && Object.values(extraFeatures).some(v => v > 0) ? `
-### Recursos Adicionais
-${Object.entries(extraFeatures)
-  .filter(([_, quantity]) => quantity > 0)
-  .map(([featureId, quantity]) => {
-    const feature = selectedModel.extraFeatures?.find(f => f.id === featureId)
-    if (!feature) return ''
-    const price = feature.pricePerStudent ? feature.pricePerStudent * studentCount * quantity : (feature.fixedPrice || 0) * quantity
-    return `• ${feature.name} (${quantity}x): ${formatCurrency(price)}`
-  }).join('\n')}
-
-**Total Recursos Extras:** ${formatCurrency(pricing.extraPrice)}
-` : ''}
-
-### INVESTIMENTO TOTAL MENSAL
-**${formatCurrency(pricing.totalPrice)}**
-
-*Valor por professor/mês: ${formatCurrency(pricing.pricePerStudent)}*
-
----
-
-## PRÓXIMOS PASSOS
-
-1. **Análise da Proposta** - Revisão dos termos e condições
-2. **Reunião de Alinhamento** - Definição de cronograma e expectativas
-3. **Contrato** - Formalização da parceria
-4. **Onboarding** - Início do treinamento e suporte
-
----
-
-## SOBRE A BETTER TECH
-
-A Better Tech é especializada em soluções educacionais inovadoras, focada em capacitar educadores com as mais modernas tecnologias de IA. Nossa plataforma TEACH representa o futuro da educação brasileira.
-
-**Contato para Dúvidas:**
-- E-mail: comercial@bettertech.com.br
-- Telefone: (11) 9999-9999
-- Site: www.bettertech.com.br
-
----
-
-*Proposta válida por 30 dias a partir da data de envio.*
-*Valores sujeitos a reajustes conforme política comercial.*
-
-**Data:** ${new Date().toLocaleDateString('pt-BR')}
-**Válida até:** ${new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('pt-BR')}
-    `
-
-    const blob = new Blob([proposalContent], { type: 'text/markdown' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `proposta-teach-${proposalInfo.schoolName || 'cliente'}-${new Date().toISOString().split('T')[0]}.md`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
+  const toggleFeatureExpansion = (modelId: string) => {
+    setExpandedFeatures(prev => ({
+      ...prev,
+      [modelId]: !prev[modelId]
+    }));
   }
 
   return (
@@ -177,24 +111,44 @@ A Better Tech é especializada em soluções educacionais inovadoras, focada em 
                 {courseModels.map((model) => (
                   <div
                     key={model.id}
-                    className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                    className={`p-4 rounded-lg border-2 transition-all ${
                       selectedModel.id === model.id
                         ? 'border-blue-500 bg-blue-50'
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
-                    onClick={() => {
-                      setSelectedModel(model)
-                      setExtraFeatures({})
-                    }}
                   >
-                    <h3 className="font-semibold text-lg mb-2">{model.name}</h3>
-                    <p className="text-sm text-gray-600 mb-3">{model.description}</p>
+                    <div 
+                      className="cursor-pointer"
+                      onClick={() => {
+                        setSelectedModel(model)
+                        setExtraFeatures({})
+                      }}
+                    >
+                      <h3 className="font-semibold text-lg mb-2">{model.name}</h3>
+                      <p className="text-sm text-gray-600 mb-3">{model.description}</p>
+                    </div>
+                    
                     <div className="space-y-1">
                       {model.features.slice(0, 3).map((feature, idx) => (
                         <div key={idx} className="text-xs text-gray-500">• {feature}</div>
                       ))}
+                      
                       {model.features.length > 3 && (
-                        <div className="text-xs text-blue-500">+{model.features.length - 3} recursos</div>
+                        <Collapsible open={expandedFeatures[model.id]} onOpenChange={() => toggleFeatureExpansion(model.id)}>
+                          <CollapsibleTrigger className="flex items-center text-xs text-blue-500 hover:text-blue-700 transition-colors mt-2">
+                            <span>+{model.features.length - 3} recursos</span>
+                            {expandedFeatures[model.id] ? (
+                              <ChevronUp className="w-3 h-3 ml-1" />
+                            ) : (
+                              <ChevronDown className="w-3 h-3 ml-1" />
+                            )}
+                          </CollapsibleTrigger>
+                          <CollapsibleContent className="mt-2 space-y-1">
+                            {model.features.slice(3).map((feature, idx) => (
+                              <div key={idx + 3} className="text-xs text-gray-500">• {feature}</div>
+                            ))}
+                          </CollapsibleContent>
+                        </Collapsible>
                       )}
                     </div>
                   </div>
@@ -331,9 +285,9 @@ A Better Tech é especializada em soluções educacionais inovadoras, focada em 
             {/* Proposal Generation */}
             <Card>
               <CardHeader>
-                <CardTitle>Gerar Proposta</CardTitle>
+                <CardTitle>Gerar Proposta PDF</CardTitle>
                 <CardDescription>
-                  Preencha os dados para gerar uma proposta comercial personalizada
+                  Preencha os dados para gerar uma proposta comercial profissional em PDF
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -402,8 +356,8 @@ A Better Tech é especializada em soluções educacionais inovadoras, focada em 
                   />
                 </div>
                 <Button onClick={generateProposal} className="w-full">
-                  <Download className="w-4 h-4 mr-2" />
-                  Gerar Proposta (Markdown)
+                  <FileText className="w-4 h-4 mr-2" />
+                  Gerar Proposta PDF
                 </Button>
               </CardContent>
             </Card>
