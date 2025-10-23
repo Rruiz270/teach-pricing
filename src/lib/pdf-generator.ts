@@ -83,18 +83,19 @@ export function generateProposalPDF(data: ProposalData) {
   yPosition += 10;
 
   // Client Information Section with styled background
+  const clientSectionHeight = 52;
   pdf.setFillColor(248, 250, 252); // Light background
-  pdf.rect(15, yPosition - 5, pageWidth - 30, 45, 'F');
+  pdf.rect(15, yPosition - 8, pageWidth - 30, clientSectionHeight, 'F');
   
   // Section header with accent
   pdf.setFillColor(108, 207, 246); // Pale Azure
-  pdf.rect(15, yPosition - 5, 5, 45, 'F'); // Left accent bar
+  pdf.rect(15, yPosition - 8, 8, clientSectionHeight, 'F'); // Wider left accent bar
   
   pdf.setFontSize(14);
   pdf.setFont('helvetica', 'bold');
   pdf.setTextColor(0, 16, 17);
-  yPosition = addText('DADOS DO CLIENTE', 25, yPosition);
-  yPosition += 8;
+  yPosition = addText('DADOS DO CLIENTE', 30, yPosition);
+  yPosition += 10;
 
   pdf.setFontSize(11);
   pdf.setFont('helvetica', 'normal');
@@ -110,11 +111,11 @@ export function generateProposalPDF(data: ProposalData) {
   clientData.forEach(([label, value]) => {
     pdf.setTextColor(117, 119, 128); // Better Gray for labels
     pdf.setFont('helvetica', 'bold');
-    pdf.text(label, 25, yPosition);
+    pdf.text(label, 30, yPosition);
     pdf.setTextColor(0, 16, 17); // Rich Black for values
     pdf.setFont('helvetica', 'normal');
-    pdf.text(value, 80, yPosition);
-    yPosition += 6;
+    pdf.text(value, 90, yPosition);
+    yPosition += 5;
   });
   
   yPosition += 3;
@@ -129,69 +130,71 @@ export function generateProposalPDF(data: ProposalData) {
   contactData.forEach(([label, value]) => {
     pdf.setTextColor(117, 119, 128);
     pdf.setFont('helvetica', 'bold');
-    pdf.text(label, 25, yPosition);
+    pdf.text(label, 30, yPosition);
     pdf.setTextColor(0, 16, 17);
     pdf.setFont('helvetica', 'normal');
-    pdf.text(value, 80, yPosition);
-    yPosition += 6;
+    pdf.text(value, 90, yPosition);
+    yPosition += 5;
   });
   
   yPosition += 15;
 
   // Course Information Section with Pale Azure background
+  const courseSectionHeight = 70;
   pdf.setFillColor(230, 248, 254); // Light Pale Azure background
-  pdf.rect(15, yPosition - 5, pageWidth - 30, 60, 'F');
+  pdf.rect(15, yPosition - 8, pageWidth - 30, courseSectionHeight, 'F');
   
   // Section header with accent
   pdf.setFillColor(164, 223, 0); // Yellow Green accent
-  pdf.rect(15, yPosition - 5, 5, 60, 'F'); // Left accent bar
+  pdf.rect(15, yPosition - 8, 8, courseSectionHeight, 'F'); // Wider left accent bar
   
   pdf.setFontSize(14);
   pdf.setFont('helvetica', 'bold');
   pdf.setTextColor(0, 16, 17);
-  yPosition = addText(`MODALIDADE SELECIONADA: ${data.selectedModel.name}`, 25, yPosition);
-  yPosition += 12;
-
-  pdf.setFontSize(12);
-  pdf.setFont('helvetica', 'bold');
-  pdf.setTextColor(108, 207, 246); // Pale Azure for subheaders
-  yPosition = addText('Descrição do Curso', 25, yPosition);
-  yPosition += 5;
-
-  pdf.setFontSize(11);
-  pdf.setFont('helvetica', 'normal');
-  pdf.setTextColor(0, 16, 17);
-  yPosition = addText(data.selectedModel.description, 25, yPosition, pageWidth - 50);
+  yPosition = addText(`MODALIDADE SELECIONADA: ${data.selectedModel.name}`, 30, yPosition);
   yPosition += 10;
 
   pdf.setFontSize(12);
   pdf.setFont('helvetica', 'bold');
+  pdf.setTextColor(108, 207, 246); // Pale Azure for subheaders
+  yPosition = addText('Descrição do Curso', 30, yPosition);
+  yPosition += 4;
+
+  pdf.setFontSize(11);
+  pdf.setFont('helvetica', 'normal');
+  pdf.setTextColor(0, 16, 17);
+  yPosition = addText(data.selectedModel.description, 30, yPosition, pageWidth - 60);
+  yPosition += 8;
+
+  pdf.setFontSize(12);
+  pdf.setFont('helvetica', 'bold');
   pdf.setTextColor(108, 207, 246);
-  yPosition = addText('Características Incluídas:', 25, yPosition);
-  yPosition += 5;
+  yPosition = addText('Características Incluídas:', 30, yPosition);
+  yPosition += 4;
 
   pdf.setFontSize(10);
   pdf.setFont('helvetica', 'normal');
   pdf.setTextColor(0, 16, 17);
   data.selectedModel.features.forEach(feature => {
-    yPosition = addText(`✓ ${feature}`, 30, yPosition, pageWidth - 60);
-    yPosition += 1;
+    yPosition = addText(`✓ ${feature}`, 35, yPosition, pageWidth - 70);
+    yPosition += 2;
   });
   yPosition += 15;
 
   // Financial Details Section with professional styling
+  const financialSectionHeight = 55;
   pdf.setFillColor(248, 250, 252);
-  pdf.rect(15, yPosition - 5, pageWidth - 30, 65, 'F');
+  pdf.rect(15, yPosition - 8, pageWidth - 30, financialSectionHeight, 'F');
   
   // Section header with accent
   pdf.setFillColor(117, 119, 128); // Better Gray accent
-  pdf.rect(15, yPosition - 5, 5, 65, 'F'); // Left accent bar
+  pdf.rect(15, yPosition - 8, 8, financialSectionHeight, 'F'); // Wider left accent bar
   
   pdf.setFontSize(14);
   pdf.setFont('helvetica', 'bold');
   pdf.setTextColor(0, 16, 17);
-  yPosition = addText('DETALHAMENTO FINANCEIRO', 25, yPosition);
-  yPosition += 10;
+  yPosition = addText('DETALHAMENTO FINANCEIRO', 30, yPosition);
+  yPosition += 8;
 
   // Financial details in organized layout
   const financialData = [
@@ -204,11 +207,11 @@ export function generateProposalPDF(data: ProposalData) {
   financialData.forEach(([label, value]) => {
     pdf.setTextColor(117, 119, 128); // Better Gray for labels
     pdf.setFont('helvetica', 'bold');
-    pdf.text(label, 25, yPosition);
+    pdf.text(label, 30, yPosition);
     pdf.setTextColor(0, 16, 17); // Rich Black for values
     pdf.setFont('helvetica', 'normal');
-    pdf.text(value, 120, yPosition);
-    yPosition += 6;
+    pdf.text(value, 130, yPosition);
+    yPosition += 5;
   });
   
   yPosition += 10;
@@ -216,24 +219,26 @@ export function generateProposalPDF(data: ProposalData) {
   pdf.setFontSize(12);
   pdf.setFont('helvetica', 'bold');
   pdf.setTextColor(108, 207, 246); // Pale Azure for subheaders
-  yPosition = addText('Investimento Base', 25, yPosition);
-  yPosition += 5;
+  yPosition = addText('Investimento Base', 30, yPosition);
+  yPosition += 4;
 
   pdf.setFontSize(11);
   pdf.setFont('helvetica', 'normal');
   pdf.setTextColor(0, 16, 17);
-  yPosition = addText(`Valor Mensal Base: ${formatCurrency(data.pricing.basePrice)}`, 25, yPosition);
+  yPosition = addText(`Valor Mensal Base: ${formatCurrency(data.pricing.basePrice)}`, 30, yPosition);
 
   // Extra features if any
   if (data.pricing.extraPrice > 0) {
     yPosition += 8;
     pdf.setFontSize(12);
     pdf.setFont('helvetica', 'bold');
-    yPosition = addText('Recursos Adicionais', 20, yPosition);
-    yPosition += 3;
+    pdf.setTextColor(108, 207, 246);
+    yPosition = addText('Recursos Adicionais', 30, yPosition);
+    yPosition += 4;
 
     pdf.setFontSize(11);
     pdf.setFont('helvetica', 'normal');
+    pdf.setTextColor(0, 16, 17);
     Object.entries(data.extraFeatures)
       .filter(([_, quantity]) => quantity > 0)
       .forEach(([featureId, quantity]) => {
@@ -242,43 +247,45 @@ export function generateProposalPDF(data: ProposalData) {
           const price = feature.pricePerStudent 
             ? feature.pricePerStudent * data.studentCount * quantity 
             : (feature.fixedPrice || 0) * quantity;
-          yPosition = addText(`• ${feature.name} (${quantity}x): ${formatCurrency(price)}`, 25, yPosition);
+          yPosition = addText(`• ${feature.name} (${quantity}x): ${formatCurrency(price)}`, 35, yPosition);
+          yPosition += 2;
         }
       });
 
-    yPosition += 5;
-    yPosition = addText(`Total Recursos Extras: ${formatCurrency(data.pricing.extraPrice)}`, 20, yPosition);
+    yPosition += 3;
+    pdf.setFont('helvetica', 'bold');
+    yPosition = addText(`Total Recursos Extras: ${formatCurrency(data.pricing.extraPrice)}`, 30, yPosition);
   }
 
   yPosition += 15;
 
   // Total Investment - Premium styled section
   pdf.setFillColor(0, 16, 17); // Rich Black background
-  pdf.rect(15, yPosition - 5, pageWidth - 30, 35, 'F');
+  pdf.rect(15, yPosition - 8, pageWidth - 30, 40, 'F');
   
   // Accent gradient effect (multiple rectangles for gradient-like effect)
   pdf.setFillColor(108, 207, 246); // Pale Azure
-  pdf.rect(15, yPosition - 5, pageWidth - 30, 3, 'F');
+  pdf.rect(15, yPosition - 8, pageWidth - 30, 3, 'F');
   pdf.setFillColor(164, 223, 0); // Yellow Green
-  pdf.rect(15, yPosition + 30, pageWidth - 30, 2, 'F');
+  pdf.rect(15, yPosition + 29, pageWidth - 30, 3, 'F');
   
   pdf.setTextColor(255, 255, 252); // Baby Powder text
   pdf.setFontSize(16);
   pdf.setFont('helvetica', 'bold');
-  yPosition = addText('INVESTIMENTO TOTAL MENSAL', 25, yPosition + 5);
-  yPosition += 10;
+  yPosition = addText('INVESTIMENTO TOTAL MENSAL', 30, yPosition + 3);
+  yPosition += 8;
   
   // Large price display
   pdf.setFontSize(24);
   pdf.setTextColor(108, 207, 246); // Pale Azure for price
   pdf.setFont('helvetica', 'bold');
-  yPosition = addText(formatCurrency(data.pricing.totalPrice), 25, yPosition);
+  yPosition = addText(formatCurrency(data.pricing.totalPrice), 30, yPosition);
 
   // Per teacher price in smaller text
   pdf.setTextColor(255, 255, 252);
   pdf.setFontSize(11);
   pdf.setFont('helvetica', 'italic');
-  yPosition = addText(`Valor por professor/mês: ${formatCurrency(data.pricing.pricePerStudent)}`, 25, yPosition + 5);
+  yPosition = addText(`Valor por professor/mês: ${formatCurrency(data.pricing.pricePerStudent)}`, 30, yPosition + 5);
 
   pdf.setTextColor(0, 16, 17); // Reset to Rich Black
   yPosition += 20;
