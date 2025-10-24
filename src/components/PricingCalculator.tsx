@@ -25,6 +25,7 @@ interface ProposalInfo {
 }
 
 export default function PricingCalculator() {
+  const [activeCourseModels, setActiveCourseModels] = useState<CourseModel[]>(courseModels)
   const [selectedModel, setSelectedModel] = useState<CourseModel>(courseModels[0])
   const [studentCount, setStudentCount] = useState<number>(100)
   const [extraFeatures, setExtraFeatures] = useState<{ [key: string]: number }>({})
@@ -42,6 +43,21 @@ export default function PricingCalculator() {
   const [showAdminModal, setShowAdminModal] = useState(false)
   const [isAdmin, setIsAdmin] = useState(true) // TODO: Replace with real auth logic
   const [editingModels, setEditingModels] = useState<CourseModel[]>(courseModels)
+
+  // Load custom models from localStorage on component mount
+  useEffect(() => {
+    const savedModels = localStorage.getItem('customCourseModels')
+    if (savedModels) {
+      try {
+        const parsedModels = JSON.parse(savedModels)
+        setActiveCourseModels(parsedModels)
+        setEditingModels(parsedModels)
+        setSelectedModel(parsedModels[0])
+      } catch (error) {
+        console.error('Error loading custom models:', error)
+      }
+    }
+  }, [])
 
   const pricing = calculatePrice(selectedModel.id, studentCount, extraFeatures)
 
@@ -95,7 +111,13 @@ export default function PricingCalculator() {
             {/* Admin Button - Top Right */}
             {isAdmin && (
               <div className="absolute top-4 right-4 z-20">
-                <Dialog open={showAdminModal} onOpenChange={setShowAdminModal}>
+                <Dialog open={showAdminModal} onOpenChange={(open) => {
+                  if (open) {
+                    // Reset editing models to current active models when opening
+                    setEditingModels([...activeCourseModels])
+                  }
+                  setShowAdminModal(open)
+                }}>
                   <DialogTrigger asChild>
                     <Button
                       variant="outline"
@@ -147,7 +169,7 @@ export default function PricingCalculator() {
                                 </div>
                                 <div>
                                   <Label htmlFor={`model-desc-${index}`}>Descrição</Label>
-                                  <Input
+                                  <textarea
                                     id={`model-desc-${index}`}
                                     value={model.description}
                                     onChange={(e) => {
@@ -155,6 +177,8 @@ export default function PricingCalculator() {
                                       newModels[index].description = e.target.value
                                       setEditingModels(newModels)
                                     }}
+                                    className="flex min-h-[60px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                    placeholder="Descrição do curso..."
                                   />
                                 </div>
                               </div>
@@ -197,7 +221,143 @@ export default function PricingCalculator() {
                                     </div>
                                   ))}
                                 </div>
+                              
+                              {/* Course Features Editing */}
+                              <div>
+                                <Label>Características do Curso</Label>
+                                <div className="space-y-2 mt-2">
+                                  {model.features.map((feature, featureIndex) => (
+                                    <div key={featureIndex} className="flex gap-2">
+                                      <Input
+                                        value={feature}
+                                        onChange={(e) => {
+                                          const newModels = [...editingModels]
+                                          newModels[index].features[featureIndex] = e.target.value
+                                          setEditingModels(newModels)
+                                        }}
+                                        placeholder="Característica do curso..."
+                                      />
+                                      <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => {
+                                          const newModels = [...editingModels]
+                                          newModels[index].features.splice(featureIndex, 1)
+                                          setEditingModels(newModels)
+                                        }}
+                                        className="text-red-600 hover:text-red-700"
+                                      >
+                                        ✕
+                                      </Button>
+                                    </div>
+                                  ))}
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      const newModels = [...editingModels]
+                                      newModels[index].features.push('Nova característica')
+                                      setEditingModels(newModels)
+                                    }}
+                                    className="text-better-azure hover:text-better-green"
+                                  >
+                                    + Adicionar Característica
+                                  </Button>
+                                </div>
                               </div>
+                              
+                              {/* Extra Features Editing */}
+                              {model.extraFeatures && (
+                                <div>
+                                  <Label>Recursos Adicionais</Label>
+                                  <div className="space-y-3 mt-2">
+                                    {model.extraFeatures.map((extraFeature, extraIndex) => (
+                                      <div key={extraFeature.id} className="p-3 border rounded-lg bg-gray-50 space-y-2">
+                                        <div className="grid grid-cols-2 gap-2">
+                                          <div>
+                                            <Label className="text-xs">Nome do Recurso</Label>
+                                            <Input
+                                              value={extraFeature.name}
+                                              onChange={(e) => {
+                                                const newModels = [...editingModels]
+                                                newModels[index].extraFeatures![extraIndex].name = e.target.value
+                                                setEditingModels(newModels)
+                                              }}
+                                              placeholder="Nome do recurso..."
+                                              className="text-sm"
+                                            />
+                                          </div>
+                                          <div>
+                                            <Label className="text-xs">Preço por Professor</Label>
+                                            <Input
+                                              type="number"
+                                              value={extraFeature.pricePerStudent || ''}
+                                              onChange={(e) => {
+                                                const newModels = [...editingModels]
+                                                newModels[index].extraFeatures![extraIndex].pricePerStudent = parseInt(e.target.value) || 0
+                                                setEditingModels(newModels)
+                                              }}
+                                              placeholder="0"
+                                              className="text-sm"
+                                            />
+                                          </div>
+                                        </div>
+                                        <div>
+                                          <Label className="text-xs">Descrição</Label>
+                                          <textarea
+                                            value={extraFeature.description}
+                                            onChange={(e) => {
+                                              const newModels = [...editingModels]
+                                              newModels[index].extraFeatures![extraIndex].description = e.target.value
+                                              setEditingModels(newModels)
+                                            }}
+                                            className="w-full text-sm min-h-[40px] rounded-md border border-input bg-background px-2 py-1 ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                            placeholder="Descrição do recurso adicional..."
+                                          />
+                                        </div>
+                                        <div className="flex justify-end">
+                                          <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => {
+                                              const newModels = [...editingModels]
+                                              newModels[index].extraFeatures!.splice(extraIndex, 1)
+                                              setEditingModels(newModels)
+                                            }}
+                                            className="text-red-600 hover:text-red-700 text-xs"
+                                          >
+                                            Remover Recurso
+                                          </Button>
+                                        </div>
+                                      </div>
+                                    ))}
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => {
+                                        const newModels = [...editingModels]
+                                        if (!newModels[index].extraFeatures) {
+                                          newModels[index].extraFeatures = []
+                                        }
+                                        newModels[index].extraFeatures!.push({
+                                          id: `extra-${Date.now()}`,
+                                          name: 'Novo Recurso',
+                                          description: 'Descrição do novo recurso',
+                                          pricePerStudent: 0
+                                        })
+                                        setEditingModels(newModels)
+                                      }}
+                                      className="text-better-azure hover:text-better-green"
+                                    >
+                                      + Adicionar Recurso Adicional
+                                    </Button>
+                                  </div>
+                                </div>
+                              )}
                             </div>
                           ))}
                         </CardContent>
@@ -211,9 +371,24 @@ export default function PricingCalculator() {
                       <Button 
                         className="bg-better-green hover:bg-better-azure text-better-black"
                         onClick={() => {
-                          // TODO: Save changes to localStorage or API
+                          // Apply changes to live course models
+                          // In a real app, this would save to API/database
+                          // For now, we'll update the local state and localStorage
+                          
+                          // Save to localStorage for persistence
+                          localStorage.setItem('customCourseModels', JSON.stringify(editingModels))
+                          
+                          // Update active models
+                          setActiveCourseModels(editingModels)
+                          
+                          // Update the selected model if it was modified
+                          const updatedSelectedModel = editingModels.find(model => model.id === selectedModel.id)
+                          if (updatedSelectedModel) {
+                            setSelectedModel(updatedSelectedModel)
+                          }
+                          
                           setShowAdminModal(false)
-                          alert('Alterações salvas com sucesso!')
+                          alert('Alterações salvas com sucesso! As mudanças foram aplicadas imediatamente.')
                         }}
                       >
                         Salvar Alterações
@@ -257,7 +432,7 @@ export default function PricingCalculator() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="grid md:grid-cols-3 gap-4">
-                {courseModels.map((model) => (
+                {activeCourseModels.map((model) => (
                   <div
                     key={model.id}
                     className={`p-6 rounded-xl border-2 transition-all duration-300 shadow-md hover:shadow-lg ${
