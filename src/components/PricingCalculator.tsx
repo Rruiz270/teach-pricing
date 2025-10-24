@@ -265,6 +265,97 @@ export default function PricingCalculator() {
                                   </Button>
                                 </div>
                               </div>
+                              
+                              {/* Extra Features Editing (for Premium course) */}
+                              {model.extraFeatures && (
+                                <div>
+                                  <Label>Recursos Adicionais</Label>
+                                  <div className="space-y-3 mt-2">
+                                    {model.extraFeatures.map((extraFeature, extraIndex) => (
+                                      <div key={extraFeature.id} className="p-3 border rounded-lg bg-gray-50 space-y-2">
+                                        <div className="grid grid-cols-2 gap-2">
+                                          <div>
+                                            <Label className="text-xs">Nome do Recurso</Label>
+                                            <Input
+                                              value={extraFeature.name}
+                                              onChange={(e) => {
+                                                const newModels = [...editingModels]
+                                                newModels[index].extraFeatures![extraIndex].name = e.target.value
+                                                setEditingModels(newModels)
+                                              }}
+                                              placeholder="Nome do recurso..."
+                                              className="text-sm"
+                                            />
+                                          </div>
+                                          <div>
+                                            <Label className="text-xs">Preço por Professor</Label>
+                                            <Input
+                                              type="number"
+                                              value={extraFeature.pricePerStudent || ''}
+                                              onChange={(e) => {
+                                                const newModels = [...editingModels]
+                                                newModels[index].extraFeatures![extraIndex].pricePerStudent = parseInt(e.target.value) || 0
+                                                setEditingModels(newModels)
+                                              }}
+                                              placeholder="0"
+                                              className="text-sm"
+                                            />
+                                          </div>
+                                        </div>
+                                        <div>
+                                          <Label className="text-xs">Descrição</Label>
+                                          <Input
+                                            value={extraFeature.description}
+                                            onChange={(e) => {
+                                              const newModels = [...editingModels]
+                                              newModels[index].extraFeatures![extraIndex].description = e.target.value
+                                              setEditingModels(newModels)
+                                            }}
+                                            placeholder="Descrição do recurso adicional..."
+                                            className="text-sm"
+                                          />
+                                        </div>
+                                        <div className="flex justify-end">
+                                          <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => {
+                                              const newModels = [...editingModels]
+                                              newModels[index].extraFeatures!.splice(extraIndex, 1)
+                                              setEditingModels(newModels)
+                                            }}
+                                            className="text-red-600 hover:text-red-700 text-xs"
+                                          >
+                                            Remover Recurso
+                                          </Button>
+                                        </div>
+                                      </div>
+                                    ))}
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => {
+                                        const newModels = [...editingModels]
+                                        if (!newModels[index].extraFeatures) {
+                                          newModels[index].extraFeatures = []
+                                        }
+                                        newModels[index].extraFeatures!.push({
+                                          id: `extra-${Date.now()}`,
+                                          name: 'Novo Recurso',
+                                          description: 'Descrição do novo recurso',
+                                          pricePerStudent: 0
+                                        })
+                                        setEditingModels(newModels)
+                                      }}
+                                      className="text-better-azure hover:text-better-green"
+                                    >
+                                      + Adicionar Recurso Adicional
+                                    </Button>
+                                  </div>
+                                </div>
+                              )}
                             </div>
                           ))}
                         </CardContent>
