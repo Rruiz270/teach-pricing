@@ -7,10 +7,12 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Slider } from '@/components/ui/slider'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Badge } from '@/components/ui/badge'
 import { courseModels, calculatePrice, type CourseModel } from '@/lib/pricing-models'
 import { formatCurrency, formatNumber } from '@/lib/utils'
 import { generateProposalPDF } from '@/lib/pdf-generator'
-import { Calculator, Download, Users, BookOpen, Award, Clock, ChevronDown, ChevronUp, FileText } from 'lucide-react'
+import { Calculator, Download, Users, BookOpen, Award, Clock, ChevronDown, ChevronUp, FileText, Settings, Shield } from 'lucide-react'
 
 interface ProposalInfo {
   clientName: string
@@ -37,6 +39,9 @@ export default function PricingCalculator() {
     phone: ''
   })
   const [showProposal, setShowProposal] = useState(false)
+  const [showAdminModal, setShowAdminModal] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(true) // TODO: Replace with real auth logic
+  const [editingModels, setEditingModels] = useState<CourseModel[]>(courseModels)
 
   const pricing = calculatePrice(selectedModel.id, studentCount, extraFeatures)
 
@@ -86,6 +91,138 @@ export default function PricingCalculator() {
             {/* Accent gradient */}
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-better-azure via-better-green to-better-azure"></div>
             <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-better-green via-better-azure to-better-green"></div>
+            
+            {/* Admin Button - Top Right */}
+            {isAdmin && (
+              <div className="absolute top-4 right-4 z-20">
+                <Dialog open={showAdminModal} onOpenChange={setShowAdminModal}>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="bg-better-white/10 border-better-azure/30 text-better-azure hover:bg-better-azure/20 hover:text-better-white backdrop-blur-sm transition-all duration-300"
+                    >
+                      <Settings className="w-4 h-4 mr-2" />
+                      Editar Ofertas
+                      <Badge variant="secondary" className="ml-2 bg-better-green/20 text-better-black text-xs border-0">
+                        ADMIN
+                      </Badge>
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle className="flex items-center gap-2 text-better-black">
+                        <Settings className="w-5 h-5 text-better-azure" />
+                        Gerenciar Ofertas e Preços
+                      </DialogTitle>
+                      <DialogDescription>
+                        Configure os modelos de curso, preços por tier e recursos adicionais
+                      </DialogDescription>
+                    </DialogHeader>
+                    
+                    <div className="space-y-6">
+                      {/* Course Models Editor */}
+                      <Card className="border-better-gray/20">
+                        <CardHeader className="bg-gradient-to-r from-better-azure/10 to-better-green/5">
+                          <CardTitle className="flex items-center gap-2 text-better-black">
+                            <BookOpen className="w-5 h-5 text-better-azure" />
+                            Modelos de Curso
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          {editingModels.map((model, index) => (
+                            <div key={model.id} className="p-4 border rounded-lg space-y-3">
+                              <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                  <Label htmlFor={`model-name-${index}`}>Nome do Modelo</Label>
+                                  <Input
+                                    id={`model-name-${index}`}
+                                    value={model.name}
+                                    onChange={(e) => {
+                                      const newModels = [...editingModels]
+                                      newModels[index].name = e.target.value
+                                      setEditingModels(newModels)
+                                    }}
+                                  />
+                                </div>
+                                <div>
+                                  <Label htmlFor={`model-desc-${index}`}>Descrição</Label>
+                                  <Input
+                                    id={`model-desc-${index}`}
+                                    value={model.description}
+                                    onChange={(e) => {
+                                      const newModels = [...editingModels]
+                                      newModels[index].description = e.target.value
+                                      setEditingModels(newModels)
+                                    }}
+                                  />
+                                </div>
+                              </div>
+                              
+                              <div>
+                                <Label>Níveis de Preço</Label>
+                                <div className="space-y-2 mt-2">
+                                  {model.tiers.map((tier, tierIndex) => (
+                                    <div key={tierIndex} className="grid grid-cols-3 gap-2 p-2 bg-gray-50 rounded">
+                                      <Input
+                                        type="number"
+                                        placeholder="Min"
+                                        value={tier.minStudents}
+                                        onChange={(e) => {
+                                          const newModels = [...editingModels]
+                                          newModels[index].tiers[tierIndex].minStudents = parseInt(e.target.value) || 0
+                                          setEditingModels(newModels)
+                                        }}
+                                      />
+                                      <Input
+                                        type="number"
+                                        placeholder="Max (ou vazio)"
+                                        value={tier.maxStudents || ''}
+                                        onChange={(e) => {
+                                          const newModels = [...editingModels]
+                                          newModels[index].tiers[tierIndex].maxStudents = e.target.value ? parseInt(e.target.value) : null
+                                          setEditingModels(newModels)
+                                        }}
+                                      />
+                                      <Input
+                                        type="number"
+                                        placeholder="Preço por aluno"
+                                        value={tier.pricePerStudent}
+                                        onChange={(e) => {
+                                          const newModels = [...editingModels]
+                                          newModels[index].tiers[tierIndex].pricePerStudent = parseInt(e.target.value) || 0
+                                          setEditingModels(newModels)
+                                        }}
+                                      />
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </CardContent>
+                      </Card>
+                    </div>
+                    
+                    <DialogFooter>
+                      <Button variant="outline" onClick={() => setShowAdminModal(false)}>
+                        Cancelar
+                      </Button>
+                      <Button 
+                        className="bg-better-green hover:bg-better-azure text-better-black"
+                        onClick={() => {
+                          // TODO: Save changes to localStorage or API
+                          setShowAdminModal(false)
+                          alert('Alterações salvas com sucesso!')
+                        }}
+                      >
+                        Salvar Alterações
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            )}
             
             <div className="relative z-10">
               <div className="flex items-center justify-center mb-4">

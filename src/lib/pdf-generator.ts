@@ -34,10 +34,10 @@ export function generateProposalPDF(data: ProposalData) {
     if (maxWidth) {
       const lines = pdf.splitTextToSize(text, maxWidth);
       pdf.text(lines, x, y);
-      return y + (lines.length * fontSize * 0.35);
+      return y + (lines.length * (fontSize * 0.4)) + 2; // Better line spacing
     } else {
       pdf.text(text, x, y);
-      return y + (fontSize * 0.35);
+      return y + (fontSize * 0.4) + 2; // Consistent spacing
     }
   };
 
@@ -140,7 +140,10 @@ export function generateProposalPDF(data: ProposalData) {
   yPosition += 15;
 
   // Course Information Section with Pale Azure background
-  const courseSectionHeight = 70;
+  // Calculate dynamic height based on features count
+  const featureCount = data.selectedModel.features.length;
+  const courseSectionHeight = Math.max(85, 50 + (featureCount * 4));
+  
   pdf.setFillColor(230, 248, 254); // Light Pale Azure background
   pdf.rect(15, yPosition - 8, pageWidth - 30, courseSectionHeight, 'F');
   
@@ -151,35 +154,39 @@ export function generateProposalPDF(data: ProposalData) {
   pdf.setFontSize(14);
   pdf.setFont('helvetica', 'bold');
   pdf.setTextColor(0, 16, 17);
-  yPosition = addText(`MODALIDADE SELECIONADA: ${data.selectedModel.name}`, 30, yPosition);
+  yPosition = addText(`MODALIDADE: ${data.selectedModel.name}`, 30, yPosition);
   yPosition += 10;
 
   pdf.setFontSize(12);
   pdf.setFont('helvetica', 'bold');
   pdf.setTextColor(108, 207, 246); // Pale Azure for subheaders
   yPosition = addText('Descrição do Curso', 30, yPosition);
-  yPosition += 4;
+  yPosition += 5;
 
   pdf.setFontSize(11);
   pdf.setFont('helvetica', 'normal');
   pdf.setTextColor(0, 16, 17);
-  yPosition = addText(data.selectedModel.description, 30, yPosition, pageWidth - 60);
-  yPosition += 8;
+  // Better text wrapping for description
+  const descriptionLines = pdf.splitTextToSize(data.selectedModel.description, pageWidth - 80);
+  pdf.text(descriptionLines, 30, yPosition);
+  yPosition += (descriptionLines.length * 4) + 8;
 
   pdf.setFontSize(12);
   pdf.setFont('helvetica', 'bold');
   pdf.setTextColor(108, 207, 246);
   yPosition = addText('Características Incluídas:', 30, yPosition);
-  yPosition += 4;
+  yPosition += 5;
 
   pdf.setFontSize(10);
   pdf.setFont('helvetica', 'normal');
   pdf.setTextColor(0, 16, 17);
-  data.selectedModel.features.forEach(feature => {
-    yPosition = addText(`✓ ${feature}`, 35, yPosition, pageWidth - 70);
-    yPosition += 2;
+  data.selectedModel.features.forEach((feature, index) => {
+    // Use bullet points and better spacing
+    const featureLines = pdf.splitTextToSize(`• ${feature}`, pageWidth - 85);
+    pdf.text(featureLines, 35, yPosition);
+    yPosition += (featureLines.length * 3.5) + 1;
   });
-  yPosition += 15;
+  yPosition += 12;
 
   // Financial Details Section with professional styling
   const financialSectionHeight = 55;
@@ -290,18 +297,42 @@ export function generateProposalPDF(data: ProposalData) {
   pdf.setTextColor(0, 16, 17); // Reset to Rich Black
   yPosition += 20;
 
-  // Check if we need a new page
-  if (yPosition > pageHeight - 80) {
+  // Check if we need a new page for additional content
+  if (yPosition > pageHeight - 120) {
     pdf.addPage();
-    yPosition = 20;
+    yPosition = 35; // Leave space for page header
+    
+    // Add mini header for second page
+    pdf.setFillColor(0, 16, 17); // Rich Black
+    pdf.rect(0, 0, pageWidth, 25, 'F');
+    pdf.setFillColor(108, 207, 246); // Pale Azure accent
+    pdf.rect(0, 0, pageWidth, 3, 'F');
+    
+    pdf.setTextColor(255, 255, 252);
+    pdf.setFontSize(12);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('BETTER TECH', 20, 16);
+    pdf.setFontSize(10);
+    pdf.text('TEACH Platform - Proposta Comercial', pageWidth - 20, 16, { align: 'right' });
+    
+    pdf.setTextColor(0, 16, 17); // Reset to black for content
+  } else {
+    yPosition += 20;
   }
 
-  yPosition += 20;
-
-  // Next Steps
+  // Next Steps Section with styled background
+  const nextStepsHeight = 65;
+  pdf.setFillColor(248, 250, 252); // Light background
+  pdf.rect(15, yPosition - 8, pageWidth - 30, nextStepsHeight, 'F');
+  
+  // Section accent
+  pdf.setFillColor(164, 223, 0); // Yellow Green
+  pdf.rect(15, yPosition - 8, 8, nextStepsHeight, 'F');
+  
   pdf.setFontSize(14);
   pdf.setFont('helvetica', 'bold');
-  yPosition = addText('PRÓXIMOS PASSOS', 20, yPosition);
+  pdf.setTextColor(0, 16, 17);
+  yPosition = addText('PRÓXIMOS PASSOS', 30, yPosition);
   yPosition += 8;
 
   pdf.setFontSize(11);
@@ -314,38 +345,64 @@ export function generateProposalPDF(data: ProposalData) {
   ];
 
   nextSteps.forEach((step, index) => {
-    yPosition = addText(`${index + 1}. ${step}`, 25, yPosition, pageWidth - 50);
-    yPosition += 2;
+    const stepLines = pdf.splitTextToSize(`${index + 1}. ${step}`, pageWidth - 80);
+    pdf.text(stepLines, 35, yPosition);
+    yPosition += (stepLines.length * 4) + 3;
   });
 
   yPosition += 15;
 
-  // About Better Tech
+  // About Better Tech Section with styled background
+  const aboutSectionHeight = 50;
+  pdf.setFillColor(230, 248, 254); // Light Azure background
+  pdf.rect(15, yPosition - 8, pageWidth - 30, aboutSectionHeight, 'F');
+  
+  // Section accent
+  pdf.setFillColor(108, 207, 246); // Pale Azure
+  pdf.rect(15, yPosition - 8, 8, aboutSectionHeight, 'F');
+  
   pdf.setFontSize(14);
   pdf.setFont('helvetica', 'bold');
-  yPosition = addText('SOBRE A BETTER TECH', 20, yPosition);
+  pdf.setTextColor(0, 16, 17);
+  yPosition = addText('SOBRE A BETTER TECH', 30, yPosition);
   yPosition += 8;
 
   pdf.setFontSize(11);
   pdf.setFont('helvetica', 'normal');
-  yPosition = addText(
+  const aboutLines = pdf.splitTextToSize(
     'A Better Tech é especializada em soluções educacionais inovadoras, focada em capacitar educadores com as mais modernas tecnologias de IA. Nossa plataforma TEACH representa o futuro da educação brasileira.',
-    20, yPosition, pageWidth - 40
+    pageWidth - 70
   );
+  pdf.text(aboutLines, 30, yPosition);
+  yPosition += (aboutLines.length * 4) + 15;
 
-  yPosition += 15;
-
-  // Contact Information
+  // Contact Information Section
+  const contactSectionHeight = 35;
+  pdf.setFillColor(248, 250, 252); // Light background
+  pdf.rect(15, yPosition - 8, pageWidth - 30, contactSectionHeight, 'F');
+  
+  // Section accent
+  pdf.setFillColor(117, 119, 128); // Better Gray
+  pdf.rect(15, yPosition - 8, 8, contactSectionHeight, 'F');
+  
   pdf.setFontSize(12);
   pdf.setFont('helvetica', 'bold');
-  yPosition = addText('Contato para Dúvidas:', 20, yPosition);
-  yPosition += 5;
+  pdf.setTextColor(0, 16, 17);
+  yPosition = addText('CONTATO PARA DÚVIDAS', 30, yPosition);
+  yPosition += 7;
 
   pdf.setFontSize(11);
   pdf.setFont('helvetica', 'normal');
-  yPosition = addText('• E-mail: comercial@bettertech.com.br', 25, yPosition);
-  yPosition = addText('• Telefone: (11) 9999-9999', 25, yPosition);
-  yPosition = addText('• Site: www.bettertech.com.br', 25, yPosition);
+  const contactItems = [
+    '• E-mail: comercial@bettertech.com.br',
+    '• Telefone: (11) 9999-9999', 
+    '• Site: www.bettertech.com.br'
+  ];
+  
+  contactItems.forEach(item => {
+    yPosition = addText(item, 35, yPosition);
+    yPosition += 1;
+  });
 
   // Footer with Better Tech branding
   yPosition = pageHeight - 35;
