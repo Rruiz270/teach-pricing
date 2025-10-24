@@ -83,7 +83,7 @@ export function generateProposalPDF(data: ProposalData) {
   yPosition += 10;
 
   // Client Information Section with styled background
-  const clientSectionHeight = 52;
+  const clientSectionHeight = 58;
   pdf.setFillColor(248, 250, 252); // Light background
   pdf.rect(15, yPosition - 8, pageWidth - 30, clientSectionHeight, 'F');
   
@@ -114,8 +114,8 @@ export function generateProposalPDF(data: ProposalData) {
     pdf.text(label, 30, yPosition);
     pdf.setTextColor(0, 16, 17); // Rich Black for values
     pdf.setFont('helvetica', 'normal');
-    pdf.text(value, 90, yPosition);
-    yPosition += 5;
+    pdf.text(value, 110, yPosition); // Better alignment
+    yPosition += 6; // Better spacing
   });
   
   yPosition += 3;
@@ -133,8 +133,8 @@ export function generateProposalPDF(data: ProposalData) {
     pdf.text(label, 30, yPosition);
     pdf.setTextColor(0, 16, 17);
     pdf.setFont('helvetica', 'normal');
-    pdf.text(value, 90, yPosition);
-    yPosition += 5;
+    pdf.text(value, 110, yPosition); // Better alignment
+    yPosition += 6; // Better spacing
   });
   
   yPosition += 15;
@@ -279,20 +279,31 @@ export function generateProposalPDF(data: ProposalData) {
   pdf.setTextColor(255, 255, 252); // Baby Powder text
   pdf.setFontSize(16);
   pdf.setFont('helvetica', 'bold');
-  yPosition = addText('INVESTIMENTO TOTAL MENSAL', 30, yPosition + 3);
-  yPosition += 8;
   
-  // Large price display
+  // Center the title
+  const titleWidth = pdf.getTextWidth('INVESTIMENTO TOTAL MENSAL');
+  const titleX = (pageWidth - titleWidth) / 2;
+  pdf.text('INVESTIMENTO TOTAL MENSAL', titleX, yPosition + 10);
+  yPosition += 18;
+  
+  // Large price display - centered
   pdf.setFontSize(24);
   pdf.setTextColor(108, 207, 246); // Pale Azure for price
   pdf.setFont('helvetica', 'bold');
-  yPosition = addText(formatCurrency(data.pricing.totalPrice), 30, yPosition);
+  const priceText = formatCurrency(data.pricing.totalPrice);
+  const priceWidth = pdf.getTextWidth(priceText);
+  const priceX = (pageWidth - priceWidth) / 2;
+  pdf.text(priceText, priceX, yPosition);
+  yPosition += 12;
 
-  // Per teacher price in smaller text
+  // Per teacher price in smaller text - centered
   pdf.setTextColor(255, 255, 252);
   pdf.setFontSize(11);
   pdf.setFont('helvetica', 'italic');
-  yPosition = addText(`Valor por professor/mês: ${formatCurrency(data.pricing.pricePerStudent)}`, 30, yPosition + 5);
+  const subText = `Valor por professor/mês: ${formatCurrency(data.pricing.pricePerStudent)}`;
+  const subWidth = pdf.getTextWidth(subText);
+  const subX = (pageWidth - subWidth) / 2;
+  pdf.text(subText, subX, yPosition);
 
   pdf.setTextColor(0, 16, 17); // Reset to Rich Black
   yPosition += 20;
