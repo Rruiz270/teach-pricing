@@ -51,41 +51,39 @@ export function generateProposalPDF(data: ProposalData) {
   pdf.rect(0, 0, pageWidth, 5, 'F');
   
   // Better Tech <B> Logo (simplified representation)
-  pdf.setFillColor(164, 223, 0); // Green for logo
-  // Draw a stylized <B> shape
-  pdf.setFontSize(28);
+  pdf.setFontSize(24);
   pdf.setFont('helvetica', 'bold');
   pdf.setTextColor(164, 223, 0); // Green
   pdf.text('<', 20, 22);
   pdf.setTextColor(255, 255, 252); // White
-  pdf.text('B', 30, 22);
+  pdf.text('B', 28, 22);
   pdf.setTextColor(164, 223, 0); // Green
-  pdf.text('>', 43, 22);
+  pdf.text('>', 38, 22);
   
   // Better Tech text logo
   pdf.setTextColor(255, 255, 252); // White text
-  pdf.setFontSize(24);
+  pdf.setFontSize(20);
   pdf.setFont('helvetica', 'bold');
-  pdf.text('BETTER', 65, 22);
+  pdf.text('BETTER', 55, 22);
   pdf.setTextColor(164, 223, 0); // Green for TECH
-  pdf.text('TECH', 125, 22);
+  pdf.text('TECH', 105, 22);
   
   // Subtitle with accent color
   pdf.setTextColor(255, 255, 252); // White
   pdf.setFontSize(11);
   pdf.setFont('helvetica', 'normal');
-  pdf.text('INOVAÇÃO EM EDUCAÇÃO', 65, 30);
+  pdf.text('INOVAÇÃO EM EDUCAÇÃO', 55, 30);
   
-  // Document title
+  // Document title - moved to avoid overlap
   pdf.setTextColor(255, 255, 252);
-  pdf.setFontSize(14);
+  pdf.setFontSize(12);
   pdf.setFont('helvetica', 'bold');
-  pdf.text('TEACH Platform - Proposta Comercial', pageWidth - 20, 22, { align: 'right' });
+  pdf.text('TEACH Platform - Proposta Comercial', pageWidth - 15, 18, { align: 'right' });
   
   // Date in smaller text
   pdf.setFontSize(9);
   pdf.setFont('helvetica', 'normal');
-  pdf.text(new Date().toLocaleDateString('pt-BR'), pageWidth - 20, 30, { align: 'right' });
+  pdf.text(new Date().toLocaleDateString('pt-BR'), pageWidth - 15, 28, { align: 'right' });
 
   yPosition = 50;
   pdf.setTextColor(117, 119, 128); // Better Tech Grey for body text
@@ -338,7 +336,7 @@ export function generateProposalPDF(data: ProposalData) {
     pdf.setFont('helvetica', 'bold');
     pdf.text('BETTER TECH', 20, 16);
     pdf.setFontSize(10);
-    pdf.text('TEACH Platform - Proposta Comercial', pageWidth - 20, 16, { align: 'right' });
+    pdf.text('TEACH Platform - Proposta Comercial', pageWidth - 15, 16, { align: 'right' });
     
     pdf.setTextColor(117, 119, 128); // Reset to Better Tech Grey for content
   } else {
@@ -419,9 +417,9 @@ export function generateProposalPDF(data: ProposalData) {
   pdf.setFontSize(11);
   pdf.setFont('helvetica', 'normal');
   const contactItems = [
-    '• E-mail: comercial@bettertech.com.br',
-    '• Telefone: (11) 9999-9999', 
-    '• Site: www.bettertech.com.br'
+    '• E-mail: raphael.ruiz@betteredu.com.br',
+    '• Telefone: +55 11 98944-8557', 
+    '• Site: www.betteredu.com.br'
   ];
   
   contactItems.forEach(item => {
