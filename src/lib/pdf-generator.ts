@@ -42,25 +42,39 @@ export function generateProposalPDF(data: ProposalData) {
   };
 
   // Header with Better Tech brand design
-  // Main header background - Rich Black
-  pdf.setFillColor(0, 16, 17); // Better Tech Rich Black #001011
+  // Main header background - Grey
+  pdf.setFillColor(117, 119, 128); // Better Tech Grey #757780
   pdf.rect(0, 0, pageWidth, 35, 'F');
   
-  // Accent stripe - Pale Azure
-  pdf.setFillColor(108, 207, 246); // Better Tech Pale Azure #6CCFF6
+  // Accent stripe - Green
+  pdf.setFillColor(164, 223, 0); // Better Tech Green #A4DF00
   pdf.rect(0, 0, pageWidth, 5, 'F');
   
-  // Better Tech logo and title
-  pdf.setTextColor(255, 255, 252); // Baby Powder text
+  // Better Tech <B> Logo (simplified representation)
+  pdf.setFillColor(164, 223, 0); // Green for logo
+  // Draw a stylized <B> shape
+  pdf.setFontSize(28);
+  pdf.setFont('helvetica', 'bold');
+  pdf.setTextColor(164, 223, 0); // Green
+  pdf.text('<', 20, 22);
+  pdf.setTextColor(255, 255, 252); // White
+  pdf.text('B', 30, 22);
+  pdf.setTextColor(164, 223, 0); // Green
+  pdf.text('>', 43, 22);
+  
+  // Better Tech text logo
+  pdf.setTextColor(255, 255, 252); // White text
   pdf.setFontSize(24);
   pdf.setFont('helvetica', 'bold');
-  pdf.text('BETTER TECH', 20, 22);
+  pdf.text('BETTER', 65, 22);
+  pdf.setTextColor(164, 223, 0); // Green for TECH
+  pdf.text('TECH', 125, 22);
   
   // Subtitle with accent color
-  pdf.setTextColor(108, 207, 246); // Pale Azure
+  pdf.setTextColor(255, 255, 252); // White
   pdf.setFontSize(11);
   pdf.setFont('helvetica', 'normal');
-  pdf.text('INOVAÇÃO EM EDUCAÇÃO', 20, 30);
+  pdf.text('INOVAÇÃO EM EDUCAÇÃO', 65, 30);
   
   // Document title
   pdf.setTextColor(255, 255, 252);
@@ -74,7 +88,7 @@ export function generateProposalPDF(data: ProposalData) {
   pdf.text(new Date().toLocaleDateString('pt-BR'), pageWidth - 20, 30, { align: 'right' });
 
   yPosition = 50;
-  pdf.setTextColor(0, 16, 17); // Better Tech Rich Black for body text
+  pdf.setTextColor(117, 119, 128); // Better Tech Grey for body text
 
   // Title
   pdf.setFontSize(18);
@@ -84,16 +98,16 @@ export function generateProposalPDF(data: ProposalData) {
 
   // Client Information Section with styled background
   const clientSectionHeight = 58;
-  pdf.setFillColor(248, 250, 252); // Light background
+  pdf.setFillColor(255, 255, 252); // Better Tech White background
   pdf.rect(15, yPosition - 8, pageWidth - 30, clientSectionHeight, 'F');
   
   // Section header with accent
-  pdf.setFillColor(108, 207, 246); // Pale Azure
+  pdf.setFillColor(164, 223, 0); // Better Tech Green
   pdf.rect(15, yPosition - 8, 8, clientSectionHeight, 'F'); // Wider left accent bar
   
   pdf.setFontSize(14);
   pdf.setFont('helvetica', 'bold');
-  pdf.setTextColor(0, 16, 17);
+  pdf.setTextColor(117, 119, 128); // Better Tech Grey
   yPosition = addText('DADOS DO CLIENTE', 30, yPosition);
   yPosition += 10;
 
@@ -109,10 +123,10 @@ export function generateProposalPDF(data: ProposalData) {
   ];
   
   clientData.forEach(([label, value]) => {
-    pdf.setTextColor(117, 119, 128); // Better Gray for labels
+    pdf.setTextColor(117, 119, 128); // Better Grey for labels
     pdf.setFont('helvetica', 'bold');
     pdf.text(label, 30, yPosition);
-    pdf.setTextColor(0, 16, 17); // Rich Black for values
+    pdf.setTextColor(117, 119, 128); // Better Grey for values
     pdf.setFont('helvetica', 'normal');
     pdf.text(value, 110, yPosition); // Better alignment
     yPosition += 6; // Better spacing
@@ -128,10 +142,10 @@ export function generateProposalPDF(data: ProposalData) {
   ];
   
   contactData.forEach(([label, value]) => {
-    pdf.setTextColor(117, 119, 128);
+    pdf.setTextColor(117, 119, 128); // Better Grey
     pdf.setFont('helvetica', 'bold');
     pdf.text(label, 30, yPosition);
-    pdf.setTextColor(0, 16, 17);
+    pdf.setTextColor(117, 119, 128); // Better Grey
     pdf.setFont('helvetica', 'normal');
     pdf.text(value, 110, yPosition); // Better alignment
     yPosition += 6; // Better spacing
@@ -139,33 +153,33 @@ export function generateProposalPDF(data: ProposalData) {
   
   yPosition += 15;
 
-  // Course Information Section with Pale Azure background
+  // Course Information Section with light background
   // Calculate dynamic height based on features count
   const featureCount = data.selectedModel.features.length;
   const courseSectionHeight = Math.max(85, 50 + (featureCount * 4));
   
-  pdf.setFillColor(230, 248, 254); // Light Pale Azure background
+  pdf.setFillColor(248, 248, 248); // Light grey background
   pdf.rect(15, yPosition - 8, pageWidth - 30, courseSectionHeight, 'F');
   
   // Section header with accent
-  pdf.setFillColor(164, 223, 0); // Yellow Green accent
+  pdf.setFillColor(164, 223, 0); // Better Tech Green accent
   pdf.rect(15, yPosition - 8, 8, courseSectionHeight, 'F'); // Wider left accent bar
   
   pdf.setFontSize(14);
   pdf.setFont('helvetica', 'bold');
-  pdf.setTextColor(0, 16, 17);
+  pdf.setTextColor(117, 119, 128); // Better Tech Grey
   yPosition = addText(`MODALIDADE: ${data.selectedModel.name}`, 30, yPosition);
   yPosition += 10;
 
   pdf.setFontSize(12);
   pdf.setFont('helvetica', 'bold');
-  pdf.setTextColor(108, 207, 246); // Pale Azure for subheaders
+  pdf.setTextColor(164, 223, 0); // Better Tech Green for subheaders
   yPosition = addText('Descrição do Curso', 30, yPosition);
   yPosition += 5;
 
   pdf.setFontSize(11);
   pdf.setFont('helvetica', 'normal');
-  pdf.setTextColor(0, 16, 17);
+  pdf.setTextColor(117, 119, 128); // Better Tech Grey
   // Better text wrapping for description
   const descriptionLines = pdf.splitTextToSize(data.selectedModel.description, pageWidth - 80);
   pdf.text(descriptionLines, 30, yPosition);
@@ -173,13 +187,13 @@ export function generateProposalPDF(data: ProposalData) {
 
   pdf.setFontSize(12);
   pdf.setFont('helvetica', 'bold');
-  pdf.setTextColor(108, 207, 246);
+  pdf.setTextColor(164, 223, 0); // Better Tech Green
   yPosition = addText('Características Incluídas:', 30, yPosition);
   yPosition += 5;
 
   pdf.setFontSize(10);
   pdf.setFont('helvetica', 'normal');
-  pdf.setTextColor(0, 16, 17);
+  pdf.setTextColor(117, 119, 128); // Better Tech Grey
   data.selectedModel.features.forEach((feature, index) => {
     // Use bullet points and better spacing
     const featureLines = pdf.splitTextToSize(`• ${feature}`, pageWidth - 85);
@@ -190,16 +204,16 @@ export function generateProposalPDF(data: ProposalData) {
 
   // Financial Details Section with professional styling
   const financialSectionHeight = 55;
-  pdf.setFillColor(248, 250, 252);
+  pdf.setFillColor(255, 255, 252); // Better Tech White
   pdf.rect(15, yPosition - 8, pageWidth - 30, financialSectionHeight, 'F');
   
   // Section header with accent
-  pdf.setFillColor(117, 119, 128); // Better Gray accent
+  pdf.setFillColor(117, 119, 128); // Better Tech Grey accent
   pdf.rect(15, yPosition - 8, 8, financialSectionHeight, 'F'); // Wider left accent bar
   
   pdf.setFontSize(14);
   pdf.setFont('helvetica', 'bold');
-  pdf.setTextColor(0, 16, 17);
+  pdf.setTextColor(117, 119, 128); // Better Tech Grey
   yPosition = addText('DETALHAMENTO FINANCEIRO', 30, yPosition);
   yPosition += 8;
 
@@ -212,10 +226,10 @@ export function generateProposalPDF(data: ProposalData) {
   
   pdf.setFontSize(11);
   financialData.forEach(([label, value]) => {
-    pdf.setTextColor(117, 119, 128); // Better Gray for labels
+    pdf.setTextColor(117, 119, 128); // Better Tech Grey for labels
     pdf.setFont('helvetica', 'bold');
     pdf.text(label, 30, yPosition);
-    pdf.setTextColor(0, 16, 17); // Rich Black for values
+    pdf.setTextColor(117, 119, 128); // Better Tech Grey for values
     pdf.setFont('helvetica', 'normal');
     pdf.text(value, 130, yPosition);
     yPosition += 5;
@@ -225,13 +239,13 @@ export function generateProposalPDF(data: ProposalData) {
 
   pdf.setFontSize(12);
   pdf.setFont('helvetica', 'bold');
-  pdf.setTextColor(108, 207, 246); // Pale Azure for subheaders
+  pdf.setTextColor(164, 223, 0); // Better Tech Green for subheaders
   yPosition = addText('Investimento Base', 30, yPosition);
   yPosition += 4;
 
   pdf.setFontSize(11);
   pdf.setFont('helvetica', 'normal');
-  pdf.setTextColor(0, 16, 17);
+  pdf.setTextColor(117, 119, 128); // Better Tech Grey
   yPosition = addText(`Valor Mensal Base: ${formatCurrency(data.pricing.basePrice)}`, 30, yPosition);
 
   // Extra features if any
@@ -239,13 +253,13 @@ export function generateProposalPDF(data: ProposalData) {
     yPosition += 8;
     pdf.setFontSize(12);
     pdf.setFont('helvetica', 'bold');
-    pdf.setTextColor(108, 207, 246);
+    pdf.setTextColor(164, 223, 0); // Better Tech Green
     yPosition = addText('Recursos Adicionais', 30, yPosition);
     yPosition += 4;
 
     pdf.setFontSize(11);
     pdf.setFont('helvetica', 'normal');
-    pdf.setTextColor(0, 16, 17);
+    pdf.setTextColor(117, 119, 128); // Better Tech Grey
     Object.entries(data.extraFeatures)
       .filter(([_, quantity]) => quantity > 0)
       .forEach(([featureId, quantity]) => {
@@ -267,16 +281,16 @@ export function generateProposalPDF(data: ProposalData) {
   yPosition += 15;
 
   // Total Investment - Premium styled section
-  pdf.setFillColor(0, 16, 17); // Rich Black background
+  pdf.setFillColor(117, 119, 128); // Better Tech Grey background
   pdf.rect(15, yPosition - 8, pageWidth - 30, 40, 'F');
   
   // Accent gradient effect (multiple rectangles for gradient-like effect)
-  pdf.setFillColor(108, 207, 246); // Pale Azure
+  pdf.setFillColor(164, 223, 0); // Better Tech Green
   pdf.rect(15, yPosition - 8, pageWidth - 30, 3, 'F');
-  pdf.setFillColor(164, 223, 0); // Yellow Green
+  pdf.setFillColor(164, 223, 0); // Better Tech Green
   pdf.rect(15, yPosition + 29, pageWidth - 30, 3, 'F');
   
-  pdf.setTextColor(255, 255, 252); // Baby Powder text
+  pdf.setTextColor(255, 255, 252); // Better Tech White text
   pdf.setFontSize(16);
   pdf.setFont('helvetica', 'bold');
   
@@ -288,7 +302,7 @@ export function generateProposalPDF(data: ProposalData) {
   
   // Large price display - centered
   pdf.setFontSize(24);
-  pdf.setTextColor(108, 207, 246); // Pale Azure for price
+  pdf.setTextColor(164, 223, 0); // Better Tech Green for price
   pdf.setFont('helvetica', 'bold');
   const priceText = formatCurrency(data.pricing.totalPrice);
   const priceWidth = pdf.getTextWidth(priceText);
@@ -297,7 +311,7 @@ export function generateProposalPDF(data: ProposalData) {
   yPosition += 12;
 
   // Per teacher price in smaller text - centered
-  pdf.setTextColor(255, 255, 252);
+  pdf.setTextColor(255, 255, 252); // Better Tech White
   pdf.setFontSize(11);
   pdf.setFont('helvetica', 'italic');
   const subText = `Valor por professor/mês: ${formatCurrency(data.pricing.pricePerStudent)}`;
@@ -305,7 +319,7 @@ export function generateProposalPDF(data: ProposalData) {
   const subX = (pageWidth - subWidth) / 2;
   pdf.text(subText, subX, yPosition);
 
-  pdf.setTextColor(0, 16, 17); // Reset to Rich Black
+  pdf.setTextColor(117, 119, 128); // Reset to Better Tech Grey
   yPosition += 20;
 
   // Check if we need a new page for additional content
@@ -314,35 +328,35 @@ export function generateProposalPDF(data: ProposalData) {
     yPosition = 35; // Leave space for page header
     
     // Add mini header for second page
-    pdf.setFillColor(0, 16, 17); // Rich Black
+    pdf.setFillColor(117, 119, 128); // Better Tech Grey
     pdf.rect(0, 0, pageWidth, 25, 'F');
-    pdf.setFillColor(108, 207, 246); // Pale Azure accent
+    pdf.setFillColor(164, 223, 0); // Better Tech Green accent
     pdf.rect(0, 0, pageWidth, 3, 'F');
     
-    pdf.setTextColor(255, 255, 252);
+    pdf.setTextColor(255, 255, 252); // Better Tech White
     pdf.setFontSize(12);
     pdf.setFont('helvetica', 'bold');
     pdf.text('BETTER TECH', 20, 16);
     pdf.setFontSize(10);
     pdf.text('TEACH Platform - Proposta Comercial', pageWidth - 20, 16, { align: 'right' });
     
-    pdf.setTextColor(0, 16, 17); // Reset to black for content
+    pdf.setTextColor(117, 119, 128); // Reset to Better Tech Grey for content
   } else {
     yPosition += 20;
   }
 
   // Next Steps Section with styled background
   const nextStepsHeight = 65;
-  pdf.setFillColor(248, 250, 252); // Light background
+  pdf.setFillColor(248, 248, 248); // Light grey background
   pdf.rect(15, yPosition - 8, pageWidth - 30, nextStepsHeight, 'F');
   
   // Section accent
-  pdf.setFillColor(164, 223, 0); // Yellow Green
+  pdf.setFillColor(164, 223, 0); // Better Tech Green
   pdf.rect(15, yPosition - 8, 8, nextStepsHeight, 'F');
   
   pdf.setFontSize(14);
   pdf.setFont('helvetica', 'bold');
-  pdf.setTextColor(0, 16, 17);
+  pdf.setTextColor(117, 119, 128); // Better Tech Grey
   yPosition = addText('PRÓXIMOS PASSOS', 30, yPosition);
   yPosition += 8;
 
@@ -365,16 +379,16 @@ export function generateProposalPDF(data: ProposalData) {
 
   // About Better Tech Section with styled background
   const aboutSectionHeight = 50;
-  pdf.setFillColor(230, 248, 254); // Light Azure background
+  pdf.setFillColor(255, 255, 252); // Better Tech White background
   pdf.rect(15, yPosition - 8, pageWidth - 30, aboutSectionHeight, 'F');
   
   // Section accent
-  pdf.setFillColor(108, 207, 246); // Pale Azure
+  pdf.setFillColor(164, 223, 0); // Better Tech Green
   pdf.rect(15, yPosition - 8, 8, aboutSectionHeight, 'F');
   
   pdf.setFontSize(14);
   pdf.setFont('helvetica', 'bold');
-  pdf.setTextColor(0, 16, 17);
+  pdf.setTextColor(117, 119, 128); // Better Tech Grey
   yPosition = addText('SOBRE A BETTER TECH', 30, yPosition);
   yPosition += 8;
 
@@ -389,16 +403,16 @@ export function generateProposalPDF(data: ProposalData) {
 
   // Contact Information Section
   const contactSectionHeight = 35;
-  pdf.setFillColor(248, 250, 252); // Light background
+  pdf.setFillColor(248, 248, 248); // Light grey background
   pdf.rect(15, yPosition - 8, pageWidth - 30, contactSectionHeight, 'F');
   
   // Section accent
-  pdf.setFillColor(117, 119, 128); // Better Gray
+  pdf.setFillColor(117, 119, 128); // Better Tech Grey
   pdf.rect(15, yPosition - 8, 8, contactSectionHeight, 'F');
   
   pdf.setFontSize(12);
   pdf.setFont('helvetica', 'bold');
-  pdf.setTextColor(0, 16, 17);
+  pdf.setTextColor(117, 119, 128); // Better Tech Grey
   yPosition = addText('CONTATO PARA DÚVIDAS', 30, yPosition);
   yPosition += 7;
 
@@ -419,16 +433,16 @@ export function generateProposalPDF(data: ProposalData) {
   yPosition = pageHeight - 35;
   
   // Footer background
-  pdf.setFillColor(248, 250, 252);
+  pdf.setFillColor(248, 248, 248); // Light grey
   pdf.rect(0, yPosition - 5, pageWidth, 35, 'F');
   
   // Top accent line
-  pdf.setFillColor(108, 207, 246); // Pale Azure
+  pdf.setFillColor(164, 223, 0); // Better Tech Green
   pdf.rect(0, yPosition - 5, pageWidth, 2, 'F');
 
   pdf.setFontSize(9);
   pdf.setFont('helvetica', 'normal');
-  pdf.setTextColor(117, 119, 128); // Better Gray
+  pdf.setTextColor(117, 119, 128); // Better Tech Grey
   const currentDate = new Date().toLocaleDateString('pt-BR');
   const validUntil = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('pt-BR');
   
@@ -438,12 +452,14 @@ export function generateProposalPDF(data: ProposalData) {
   // Better Tech footer branding
   pdf.setFontSize(11);
   pdf.setFont('helvetica', 'bold');
-  pdf.setTextColor(0, 16, 17); // Rich Black
-  pdf.text('BETTER TECH', pageWidth - 20, yPosition, { align: 'right' });
+  pdf.setTextColor(117, 119, 128); // Better Tech Grey
+  pdf.text('BETTER', pageWidth - 70, yPosition, { align: 'right' });
+  pdf.setTextColor(164, 223, 0); // Better Tech Green
+  pdf.text('TECH', pageWidth - 20, yPosition, { align: 'right' });
   
   pdf.setFontSize(9);
   pdf.setFont('helvetica', 'normal');
-  pdf.setTextColor(108, 207, 246); // Pale Azure
+  pdf.setTextColor(164, 223, 0); // Better Tech Green
   pdf.text('🇧🇷 Transformando a Educação Brasileira', pageWidth - 20, yPosition + 8, { align: 'right' });
 
   // Save the PDF
