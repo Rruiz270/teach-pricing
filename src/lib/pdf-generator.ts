@@ -419,7 +419,7 @@ export function generateProposalPDF(data: ProposalData) {
   const contactItems = [
     '• E-mail: raphael.ruiz@betteredu.com.br',
     '• Telefone: +55 11 98944-8557', 
-    '• Site: www.betteredu.com.br'
+    '• Site: www.betteredtech.com.br/home/'
   ];
   
   contactItems.forEach(item => {
