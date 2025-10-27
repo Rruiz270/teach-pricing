@@ -50,30 +50,40 @@ export function generateProposalPDF(data: ProposalData) {
   pdf.setFillColor(164, 223, 0); // Better Tech Green #A4DF00
   pdf.rect(0, 0, pageWidth, 5, 'F');
   
-  // Better Tech Logo (BETTER TECH text)
-  pdf.setTextColor(255, 255, 252); // White text
-  pdf.setFontSize(28);
+  // Better Tech <B> Logo
+  pdf.setFontSize(24);
   pdf.setFont('helvetica', 'bold');
-  pdf.text('BETTER', 20, 22);
+  pdf.setTextColor(164, 223, 0); // Green
+  pdf.text('<', 20, 22);
+  pdf.setTextColor(255, 255, 252); // White
+  pdf.text('B', 28, 22);
+  pdf.setTextColor(164, 223, 0); // Green
+  pdf.text('>', 38, 22);
+  
+  // Better Tech text - properly spaced
+  pdf.setTextColor(255, 255, 252); // White text
+  pdf.setFontSize(20);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('BETTER', 55, 22);
   pdf.setTextColor(164, 223, 0); // Green for TECH
-  pdf.text('TECH', 90, 22);
+  pdf.text('TECH', 115, 22);
   
   // Subtitle with accent color
   pdf.setTextColor(255, 255, 252); // White
-  pdf.setFontSize(11);
+  pdf.setFontSize(10);
   pdf.setFont('helvetica', 'normal');
-  pdf.text('INOVAÇÃO EM EDUCAÇÃO', 20, 30);
+  pdf.text('INOVAÇÃO EM EDUCAÇÃO', 55, 30);
   
-  // Document title - properly positioned
+  // Document title - properly positioned to avoid overlap
   pdf.setTextColor(255, 255, 252);
-  pdf.setFontSize(11);
+  pdf.setFontSize(10);
   pdf.setFont('helvetica', 'bold');
-  pdf.text('TEACH Platform - Proposta Comercial', pageWidth - 10, 15, { align: 'right' });
+  pdf.text('TEACH Platform - Proposta Comercial', pageWidth - 10, 12, { align: 'right' });
   
   // Date in smaller text
-  pdf.setFontSize(9);
+  pdf.setFontSize(8);
   pdf.setFont('helvetica', 'normal');
-  pdf.text(new Date().toLocaleDateString('pt-BR'), pageWidth - 10, 25, { align: 'right' });
+  pdf.text(new Date().toLocaleDateString('pt-BR'), pageWidth - 10, 22, { align: 'right' });
 
   yPosition = 45;
   pdf.setTextColor(117, 119, 128); // Better Tech Grey for body text
@@ -321,15 +331,16 @@ export function generateProposalPDF(data: ProposalData) {
     pdf.setFillColor(164, 223, 0); // Better Tech Green accent
     pdf.rect(0, 0, pageWidth, 3, 'F');
     
+    // Second page header - simpler
     pdf.setTextColor(255, 255, 252); // Better Tech White
-    pdf.setFontSize(16);
+    pdf.setFontSize(14);
     pdf.setFont('helvetica', 'bold');
     pdf.text('BETTER', 20, 16);
     pdf.setTextColor(164, 223, 0); // Green
     pdf.text('TECH', 65, 16);
     pdf.setTextColor(255, 255, 252); // White
-    pdf.setFontSize(10);
-    pdf.text('TEACH Platform - Proposta Comercial', pageWidth - 15, 16, { align: 'right' });
+    pdf.setFontSize(9);
+    pdf.text('TEACH Platform - Proposta Comercial', pageWidth - 10, 16, { align: 'right' });
     
     pdf.setTextColor(117, 119, 128); // Reset to Better Tech Grey for content
   } else {
@@ -440,27 +451,24 @@ export function generateProposalPDF(data: ProposalData) {
   yPosition = addText(`Proposta válida por 30 dias a partir da data de envio.`, 20, yPosition + 5);
   yPosition = addText(`Data: ${currentDate} | Válida até: ${validUntil}`, 20, yPosition + 3);
   
-  // Better Tech footer branding - centered and professional
-  pdf.setFontSize(14);
+  // Better Tech footer branding - simple and clean
+  pdf.setFontSize(12);
   pdf.setFont('helvetica', 'bold');
   pdf.setTextColor(117, 119, 128); // Better Tech Grey
-  const betterText = 'BETTER';
-  const techText = 'TECH';
-  const betterWidth = pdf.getTextWidth(betterText);
-  const techWidth = pdf.getTextWidth(techText);
-  const totalWidth = betterWidth + techWidth;
-  const startX = (pageWidth - totalWidth) / 2;
+  const footerText = 'BETTER';
+  const footerTextWidth = pdf.getTextWidth(footerText);
+  const footerStartX = (pageWidth - footerTextWidth - pdf.getTextWidth('TECH')) / 2;
   
-  pdf.text(betterText, startX, yPosition);
+  pdf.text(footerText, footerStartX, yPosition);
   pdf.setTextColor(164, 223, 0); // Better Tech Green
-  pdf.text(techText, startX + betterWidth, yPosition);
+  pdf.text('TECH', footerStartX + footerTextWidth, yPosition);
   
-  pdf.setFontSize(9);
+  pdf.setFontSize(8);
   pdf.setFont('helvetica', 'normal');
   pdf.setTextColor(164, 223, 0); // Better Tech Green
   const tagline = '🇧🇷 Transformando a Educação Brasileira';
   const taglineWidth = pdf.getTextWidth(tagline);
-  pdf.text(tagline, (pageWidth - taglineWidth) / 2, yPosition + 8);
+  pdf.text(tagline, (pageWidth - taglineWidth) / 2, yPosition + 6);
 
   // Save the PDF
   const fileName = `proposta-teach-${data.schoolName || 'cliente'}-${new Date().toISOString().split('T')[0]}.pdf`;
