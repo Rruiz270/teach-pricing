@@ -60,13 +60,17 @@ export function generateProposalPDF(data: ProposalData) {
   pdf.setTextColor(164, 223, 0); // Green
   pdf.text('>', 38, 22);
   
-  // Better Tech text - properly spaced
+  // Better Tech text - TECH as small subtitle
   pdf.setTextColor(255, 255, 252); // White text
   pdf.setFontSize(20);
   pdf.setFont('helvetica', 'bold');
   pdf.text('BETTER', 55, 22);
+  
+  // TECH as smaller text positioned to the right
   pdf.setTextColor(164, 223, 0); // Green for TECH
-  pdf.text('TECH', 115, 22);
+  pdf.setFontSize(12);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('TECH', 125, 18); // Smaller and higher positioned
   
   // Subtitle with accent color
   pdf.setTextColor(255, 255, 252); // White
@@ -336,8 +340,11 @@ export function generateProposalPDF(data: ProposalData) {
     pdf.setFontSize(14);
     pdf.setFont('helvetica', 'bold');
     pdf.text('BETTER', 20, 16);
+    
+    // TECH as smaller subtitle
     pdf.setTextColor(164, 223, 0); // Green
-    pdf.text('TECH', 65, 16);
+    pdf.setFontSize(10);
+    pdf.text('TECH', 65, 13); // Smaller and higher
     pdf.setTextColor(255, 255, 252); // White
     pdf.setFontSize(9);
     pdf.text('TEACH Platform - Proposta Comercial', pageWidth - 10, 16, { align: 'right' });
@@ -457,11 +464,21 @@ export function generateProposalPDF(data: ProposalData) {
   pdf.setTextColor(117, 119, 128); // Better Tech Grey
   const footerText = 'BETTER';
   const footerTextWidth = pdf.getTextWidth(footerText);
-  const footerStartX = (pageWidth - footerTextWidth - pdf.getTextWidth('TECH')) / 2;
   
+  // Calculate center position for BETTER + small TECH
+  pdf.setFontSize(8); // Temporarily set to calculate TECH width
+  const techWidth = pdf.getTextWidth('TECH');
+  const totalFooterWidth = footerTextWidth + techWidth + 2; // 2px spacing
+  const footerStartX = (pageWidth - totalFooterWidth) / 2;
+  
+  // Draw BETTER
+  pdf.setFontSize(12);
   pdf.text(footerText, footerStartX, yPosition);
+  
+  // Draw TECH as small subtitle
   pdf.setTextColor(164, 223, 0); // Better Tech Green
-  pdf.text('TECH', footerStartX + footerTextWidth, yPosition);
+  pdf.setFontSize(8);
+  pdf.text('TECH', footerStartX + footerTextWidth + 2, yPosition - 2); // Small and slightly higher
   
   pdf.setFontSize(8);
   pdf.setFont('helvetica', 'normal');
