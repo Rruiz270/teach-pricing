@@ -10,6 +10,7 @@ export interface CourseModel {
   description: string;
   features: string[];
   tiers: PricingTier[];
+  asyncPlatformTiers?: PricingTierLine[];
   extraFeatures?: {
     id: string;
     name: string;
@@ -65,6 +66,12 @@ export const courseModels: CourseModel[] = [
       { minStudents: 201, maxStudents: 500, pricePerStudent: 135 },
       { minStudents: 501, maxStudents: 1000, pricePerStudent: 125 },
       { minStudents: 1001, maxStudents: null, pricePerStudent: 115 }
+    ],
+    asyncPlatformTiers: [
+      { minTeachers: 1, maxTeachers: 5000, pricePerTeacher: 15 },
+      { minTeachers: 5001, maxTeachers: 15000, pricePerTeacher: 12 },
+      { minTeachers: 15001, maxTeachers: 30000, pricePerTeacher: 10 },
+      { minTeachers: 30001, maxTeachers: null, pricePerTeacher: 8 }
     ]
   },
   {
@@ -84,6 +91,12 @@ export const courseModels: CourseModel[] = [
       { minStudents: 1, maxStudents: 200, pricePerStudent: 280 },
       { minStudents: 201, maxStudents: 500, pricePerStudent: 250 },
       { minStudents: 501, maxStudents: null, pricePerStudent: 220 }
+    ],
+    asyncPlatformTiers: [
+      { minTeachers: 1, maxTeachers: 5000, pricePerTeacher: 25 },
+      { minTeachers: 5001, maxTeachers: 15000, pricePerTeacher: 22 },
+      { minTeachers: 15001, maxTeachers: 30000, pricePerTeacher: 18 },
+      { minTeachers: 30001, maxTeachers: null, pricePerTeacher: 15 }
     ]
   },
   {
@@ -103,6 +116,12 @@ export const courseModels: CourseModel[] = [
       { minStudents: 1, maxStudents: 50, pricePerStudent: 450 },
       { minStudents: 51, maxStudents: 100, pricePerStudent: 420 },
       { minStudents: 101, maxStudents: null, pricePerStudent: 390 }
+    ],
+    asyncPlatformTiers: [
+      { minTeachers: 1, maxTeachers: 5000, pricePerTeacher: 35 },
+      { minTeachers: 5001, maxTeachers: 15000, pricePerTeacher: 30 },
+      { minTeachers: 15001, maxTeachers: 30000, pricePerTeacher: 25 },
+      { minTeachers: 30001, maxTeachers: null, pricePerTeacher: 20 }
     ]
   }
 ];
@@ -379,9 +398,11 @@ export function calculateTieredPrice(tiers: PricingTierLine[], teacherCount: num
 export function calculatePrice(
   modelId: string, 
   studentCount: number, 
-  extraFeatures: { [key: string]: number } = {}
+  extraFeatures: { [key: string]: number } = {},
+  asyncTeacherCount?: number
 ): {
   basePrice: number;
+  asyncPrice: number;
   extraPrice: number;
   totalPrice: number;
   pricePerStudent: number;
@@ -389,7 +410,7 @@ export function calculatePrice(
 } {
   const model = courseModels.find(m => m.id === modelId);
   if (!model) {
-    return { basePrice: 0, extraPrice: 0, totalPrice: 0, pricePerStudent: 0, tier: null };
+    return { basePrice: 0, asyncPrice: 0, extraPrice: 0, totalPrice: 0, pricePerStudent: 0, tier: null };
   }
 
   // Find the appropriate tier
@@ -399,10 +420,22 @@ export function calculatePrice(
   );
 
   if (!tier) {
-    return { basePrice: 0, extraPrice: 0, totalPrice: 0, pricePerStudent: 0, tier: null };
+    return { basePrice: 0, asyncPrice: 0, extraPrice: 0, totalPrice: 0, pricePerStudent: 0, tier: null };
   }
 
   const basePrice = tier.pricePerStudent * studentCount;
+  
+  // Calculate async platform price
+  let asyncPrice = 0;
+  if (model.asyncPlatformTiers && asyncTeacherCount && asyncTeacherCount > 0) {
+    const asyncTier = model.asyncPlatformTiers.find(t => 
+      asyncTeacherCount >= t.minTeachers && 
+      (t.maxTeachers === null || asyncTeacherCount <= t.maxTeachers)
+    );
+    if (asyncTier) {
+      asyncPrice = asyncTier.pricePerTeacher * asyncTeacherCount;
+    }
+  }
   
   // Calculate extra features price
   let extraPrice = 0;
@@ -419,10 +452,11 @@ export function calculatePrice(
     });
   }
 
-  const totalPrice = basePrice + extraPrice;
+  const totalPrice = basePrice + asyncPrice + extraPrice;
 
   return {
     basePrice,
+    asyncPrice,
     extraPrice,
     totalPrice,
     pricePerStudent: totalPrice / studentCount,
@@ -480,18 +514,20 @@ export function calculateTotalPrice(
   selectedPhases: string[],
   extraFeatures: { [key: string]: number } = {},
   manualPricing: { [phaseId: string]: { [lineId: string]: number } } = {},
-  phaseTeacherCounts: { [phaseId: string]: { [lineId: string]: number } } = {}
+  phaseTeacherCounts: { [phaseId: string]: { [lineId: string]: number } } = {},
+  asyncTeacherCount?: number
 ): {
   coursePrice: ReturnType<typeof calculatePrice>;
   phasePrice: ReturnType<typeof calculatePhasePrice>;
   finalTotalPrice: number;
   breakdown: {
     courseTotal: number;
+    asyncTotal: number;
     phaseTotal: number;
     extraTotal: number;
   };
 } {
-  const coursePrice = calculatePrice(modelId, studentCount, extraFeatures);
+  const coursePrice = calculatePrice(modelId, studentCount, extraFeatures, asyncTeacherCount);
   const phasePrice = calculatePhasePrice(selectedPhases, studentCount, manualPricing, phaseTeacherCounts);
   
   const finalTotalPrice = coursePrice.totalPrice + phasePrice.totalPhasePrice;
@@ -502,6 +538,7 @@ export function calculateTotalPrice(
     finalTotalPrice,
     breakdown: {
       courseTotal: coursePrice.basePrice,
+      asyncTotal: coursePrice.asyncPrice,
       phaseTotal: phasePrice.totalPhasePrice,
       extraTotal: coursePrice.extraPrice
     }
