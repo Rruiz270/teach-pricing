@@ -9,7 +9,7 @@ import { Slider } from '@/components/ui/slider'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
-import { courseModels, calculateTotalPrice, phaseModels, type CourseModel } from '@/lib/pricing-models'
+import { courseModels, calculateTotalPrice, phaseModels, calculateTieredPrice, type CourseModel } from '@/lib/pricing-models'
 import { formatCurrency, formatNumber } from '@/lib/utils'
 import { generateProposalPDF } from '@/lib/pdf-generator'
 import RoadmapSelector from '@/components/RoadmapSelector'
@@ -637,16 +637,47 @@ export default function PricingCalculator() {
                 {/* Phase Summary */}
                 <div className="p-4 border border-better-gray/20 rounded-lg">
                   <h3 className="font-bold text-lg text-better-black mb-2">Fases do Roadmap</h3>
-                  <div className="space-y-2">
-                    {pricing.phasePrice.selectedPhaseModels.map((phase) => (
-                      <div key={phase.id} className="flex justify-between text-sm">
-                        <span>{phase.name} - {phase.title}</span>
-                        <span className="text-better-azure">{phase.timeline}</span>
-                      </div>
-                    ))}
+                  <div className="space-y-3">
+                    {pricing.phasePrice.selectedPhaseModels.map((phase) => {
+                      // Calculate individual phase cost
+                      let phaseTotal = 0;
+                      phase.pricingLines.forEach(line => {
+                        const teacherCountForLine = phaseTeacherCounts[phase.id]?.[line.id] || studentCount;
+                        if (line.type === 'per_student' && line.pricePerStudent) {
+                          phaseTotal += line.pricePerStudent * teacherCountForLine;
+                        } else if (line.type === 'fixed' && line.fixedPrice) {
+                          phaseTotal += line.fixedPrice;
+                        } else if (line.type === 'manual') {
+                          const manualPrice = manualPricing[phase.id]?.[line.id] || line.fixedPrice || 0;
+                          phaseTotal += manualPrice;
+                        } else if (line.type === 'tiered' && line.tiers) {
+                          const tier = line.tiers.find(t => 
+                            teacherCountForLine >= t.minTeachers && 
+                            (t.maxTeachers === null || teacherCountForLine <= t.maxTeachers)
+                          );
+                          if (tier) {
+                            phaseTotal += tier.pricePerTeacher * teacherCountForLine;
+                          }
+                        }
+                      });
+                      
+                      return (
+                        <div key={phase.id} className="border-b border-better-gray/10 pb-2 last:border-b-0">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <span className="font-medium text-sm">{phase.name} - {phase.title}</span>
+                              <div className="text-xs text-better-gray">{phase.timeline}</div>
+                            </div>
+                            <div className="text-right">
+                              <div className="font-bold text-better-azure">{formatCurrency(phaseTotal)}</div>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
                   </div>
-                  <div className="text-lg font-bold text-better-azure mt-3">
-                    {formatCurrency(pricing.phasePrice.totalPhasePrice)}
+                  <div className="text-lg font-bold text-better-azure mt-3 pt-3 border-t border-better-gray/20">
+                    Total: {formatCurrency(pricing.phasePrice.totalPhasePrice)}
                   </div>
                 </div>
               </div>

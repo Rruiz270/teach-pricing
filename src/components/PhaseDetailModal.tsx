@@ -61,8 +61,12 @@ export default function PhaseDetailModal({
   const totalPhasePrice = phase.pricingLines.reduce((total, line) => total + calculateLineTotal(line), 0)
 
   const handleManualPriceChange = (lineId: string, value: string) => {
-    const numValue = parseInt(value) || 0
-    onUpdateManualPricing(lineId, numValue)
+    if (value === '') {
+      onUpdateManualPricing(lineId, 0)
+    } else {
+      const numValue = parseInt(value) || 0
+      onUpdateManualPricing(lineId, numValue)
+    }
   }
 
   return (
@@ -228,8 +232,9 @@ export default function PhaseDetailModal({
                       <Input
                         id={`manual-${line.id}`}
                         type="number"
-                        value={manualPricing[line.id] || line.fixedPrice || ''}
+                        value={manualPricing[line.id] !== undefined ? manualPricing[line.id] : (line.fixedPrice || '')}
                         onChange={(e) => handleManualPriceChange(line.id, e.target.value)}
+                        onFocus={(e) => e.target.select()}
                         className="flex-1"
                         placeholder="Digite o valor..."
                         min="0"
