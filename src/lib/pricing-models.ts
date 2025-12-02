@@ -248,6 +248,18 @@ export const phaseModels: PhaseModel[] = [
     year: "2027-2030",
     pricingLines: [
       {
+        id: "async_platform",
+        name: "Assíncrono Plataforma",
+        type: "tiered",
+        tiers: [
+          { minTeachers: 1, maxTeachers: 5000, pricePerTeacher: 35 },
+          { minTeachers: 5001, maxTeachers: 15000, pricePerTeacher: 32 },
+          { minTeachers: 15001, maxTeachers: 30000, pricePerTeacher: 29 },
+          { minTeachers: 30001, maxTeachers: null, pricePerTeacher: 25 }
+        ],
+        editable: false
+      },
+      {
         id: "training",
         name: "Treinamento",
         type: "tiered",
@@ -279,6 +291,18 @@ export const phaseModels: PhaseModel[] = [
     year: "2027-2030",
     pricingLines: [
       {
+        id: "async_platform",
+        name: "Assíncrono Plataforma",
+        type: "tiered",
+        tiers: [
+          { minTeachers: 1, maxTeachers: 5000, pricePerTeacher: 40 },
+          { minTeachers: 5001, maxTeachers: 15000, pricePerTeacher: 37 },
+          { minTeachers: 15001, maxTeachers: 30000, pricePerTeacher: 34 },
+          { minTeachers: 30001, maxTeachers: null, pricePerTeacher: 30 }
+        ],
+        editable: false
+      },
+      {
         id: "training",
         name: "Treinamento",
         type: "tiered",
@@ -309,6 +333,18 @@ export const phaseModels: PhaseModel[] = [
     timeline: "2028-2030",
     year: "2027-2030",
     pricingLines: [
+      {
+        id: "async_platform",
+        name: "Assíncrono Plataforma",
+        type: "tiered",
+        tiers: [
+          { minTeachers: 1, maxTeachers: 5000, pricePerTeacher: 45 },
+          { minTeachers: 5001, maxTeachers: 15000, pricePerTeacher: 42 },
+          { minTeachers: 15001, maxTeachers: 30000, pricePerTeacher: 39 },
+          { minTeachers: 30001, maxTeachers: null, pricePerTeacher: 35 }
+        ],
+        editable: false
+      },
       {
         id: "training",
         name: "Treinamento",

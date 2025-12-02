@@ -115,10 +115,17 @@ export default function PhaseDetailModal({
                   <div className="flex items-center gap-3">
                     <Input
                       type="number"
-                      value={phaseTeacherCounts[line.id] || studentCount}
-                      onChange={(e) => onUpdatePhaseTeacherCounts(line.id, parseInt(e.target.value) || 0)}
+                      value={phaseTeacherCounts[line.id] !== undefined ? phaseTeacherCounts[line.id] : studentCount}
+                      onChange={(e) => {
+                        const value = e.target.value
+                        if (value === '') {
+                          onUpdatePhaseTeacherCounts(line.id, 0)
+                        } else {
+                          onUpdatePhaseTeacherCounts(line.id, parseInt(value) || 0)
+                        }
+                      }}
                       className="w-32"
-                      min="1"
+                      min="0"
                       max={50000}
                       placeholder="Quantidade..."
                     />

@@ -40,6 +40,7 @@ export default function PricingCalculator() {
     phone: ''
   })
   const [showProposal, setShowProposal] = useState(false)
+  const [showPreviewModal, setShowPreviewModal] = useState(false)
   const [showAdminModal, setShowAdminModal] = useState(false)
   const [isAdmin, setIsAdmin] = useState(true) // TODO: Replace with real auth logic
   const [editingModels, setEditingModels] = useState<CourseModel[]>(courseModels)
@@ -66,8 +67,12 @@ export default function PricingCalculator() {
   const pricing = calculateTotalPrice(selectedModel.id, studentCount, selectedPhases, extraFeatures, manualPricing, phaseTeacherCounts)
 
   const handleStudentCountChange = (value: string) => {
-    const count = parseInt(value) || 0
-    setStudentCount(Math.max(1, count))
+    if (value === '') {
+      setStudentCount(1)
+    } else {
+      const count = parseInt(value) || 1
+      setStudentCount(Math.max(1, Math.min(count, 50000)))
+    }
   }
 
   const handleExtraFeatureChange = (featureId: string, value: number) => {
@@ -450,6 +455,7 @@ export default function PricingCalculator() {
                       type="number"
                       value={studentCount}
                       onChange={(e) => handleStudentCountChange(e.target.value)}
+                      onFocus={(e) => e.target.select()}
                       className="w-32"
                       min="1"
                       max="50000"
@@ -556,85 +562,211 @@ export default function PricingCalculator() {
               <CardHeader>
                 <CardTitle>Gerar Proposta PDF</CardTitle>
                 <CardDescription>
-                  Preencha os dados para gerar uma proposta do Plano Educacional Santa Catarina
+                  Visualize e gere uma proposta do Plano Educacional Santa Catarina
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-3">
-                <div>
-                  <Label htmlFor="clientName">Nome do Cliente</Label>
-                  <Input
-                    id="clientName"
-                    value={proposalInfo.clientName}
-                    onChange={(e) => setProposalInfo(prev => ({...prev, clientName: e.target.value}))}
-                    placeholder="Ex: Secretaria de Educação"
-                  />
+              <CardContent className="text-center py-8">
+                <p className="text-better-gray mb-4">
+                  Configure sua proposta usando os controles à esquerda e visualize o resultado clicando no botão abaixo.
+                </p>
+                <div className="space-y-3">
+                  <Button 
+                    onClick={() => setShowPreviewModal(true)}
+                    className="w-full bg-gradient-to-r from-better-azure to-better-green hover:from-better-green hover:to-better-azure text-better-black font-bold py-3 transition-all duration-300 shadow-lg hover:shadow-xl"
+                  >
+                    <FileText className="w-4 h-4 mr-2" />
+                    Visualizar Proposta
+                  </Button>
+                  <Button 
+                    onClick={generateProposal} 
+                    variant="outline"
+                    className="w-full border-better-azure text-better-azure hover:bg-better-azure hover:text-white py-3"
+                  >
+                    <FileText className="w-4 h-4 mr-2" />
+                    Gerar PDF Direto
+                  </Button>
                 </div>
-                <div>
-                  <Label htmlFor="schoolName">Instituição/Escola</Label>
-                  <Input
-                    id="schoolName"
-                    value={proposalInfo.schoolName}
-                    onChange={(e) => setProposalInfo(prev => ({...prev, schoolName: e.target.value}))}
-                    placeholder="Ex: Colégio Bandeirantes"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="cityState">Cidade/Estado</Label>
-                  <Input
-                    id="cityState"
-                    value={proposalInfo.cityState}
-                    onChange={(e) => setProposalInfo(prev => ({...prev, cityState: e.target.value}))}
-                    placeholder="Ex: São Paulo/SP"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="projectName">Nome do Projeto</Label>
-                  <Input
-                    id="projectName"
-                    value={proposalInfo.projectName}
-                    onChange={(e) => setProposalInfo(prev => ({...prev, projectName: e.target.value}))}
-                    placeholder="Ex: Capacitação IA 2024"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="contactPerson">Pessoa de Contato</Label>
-                  <Input
-                    id="contactPerson"
-                    value={proposalInfo.contactPerson}
-                    onChange={(e) => setProposalInfo(prev => ({...prev, contactPerson: e.target.value}))}
-                    placeholder="Ex: Maria Silva"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="email">E-mail</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={proposalInfo.email}
-                    onChange={(e) => setProposalInfo(prev => ({...prev, email: e.target.value}))}
-                    placeholder="Ex: maria@escola.com.br"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="phone">Telefone</Label>
-                  <Input
-                    id="phone"
-                    value={proposalInfo.phone}
-                    onChange={(e) => setProposalInfo(prev => ({...prev, phone: e.target.value}))}
-                    placeholder="Ex: (11) 99999-9999"
-                  />
-                </div>
-                <Button 
-                  onClick={generateProposal} 
-                  className="w-full bg-gradient-to-r from-better-green to-better-azure hover:from-better-azure hover:to-better-green text-better-black font-bold py-3 transition-all duration-300 shadow-lg hover:shadow-xl"
-                >
-                  <FileText className="w-4 h-4 mr-2" />
-                  Gerar Proposta PDF
-                </Button>
               </CardContent>
             </Card>
           </div>
         </div>
+
+        {/* Proposal Preview Modal */}
+        <Dialog open={showPreviewModal} onOpenChange={setShowPreviewModal}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-better-black">
+                <FileText className="w-6 h-6 text-better-azure" />
+                Previsão da Proposta - Plano Educacional Santa Catarina
+              </DialogTitle>
+              <DialogDescription>
+                Revise os detalhes antes de gerar o PDF final
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-6">
+              {/* Project Overview */}
+              <div className="p-6 bg-gradient-to-r from-better-black to-better-gray rounded-xl relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-better-azure to-better-green"></div>
+                <div className="relative z-10 text-center">
+                  <div className="text-3xl font-bold text-better-azure mb-2">
+                    {formatCurrency(pricing.finalTotalPrice)}
+                  </div>
+                  <div className="text-better-white/80">
+                    Investimento Total do Projeto
+                  </div>
+                  <div className="mt-3 text-sm text-better-white/60">
+                    {formatNumber(studentCount)} professores • {selectedPhases.length} fases selecionadas
+                  </div>
+                </div>
+              </div>
+
+              {/* Selected Plan */}
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="p-4 border border-better-gray/20 rounded-lg">
+                  <h3 className="font-bold text-lg text-better-black mb-2">{selectedModel.name}</h3>
+                  <p className="text-sm text-better-gray mb-3">{selectedModel.description}</p>
+                  <div className="text-lg font-bold text-better-azure">
+                    {formatCurrency(pricing.coursePrice.totalPrice)}
+                  </div>
+                  <div className="text-xs text-better-gray mt-1">
+                    Faixa: {pricing.coursePrice.tier?.minStudents} a {pricing.coursePrice.tier?.maxStudents || '+'} professores
+                  </div>
+                </div>
+
+                {/* Phase Summary */}
+                <div className="p-4 border border-better-gray/20 rounded-lg">
+                  <h3 className="font-bold text-lg text-better-black mb-2">Fases do Roadmap</h3>
+                  <div className="space-y-2">
+                    {pricing.phasePrice.selectedPhaseModels.map((phase) => (
+                      <div key={phase.id} className="flex justify-between text-sm">
+                        <span>{phase.name} - {phase.title}</span>
+                        <span className="text-better-azure">{phase.timeline}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="text-lg font-bold text-better-azure mt-3">
+                    {formatCurrency(pricing.phasePrice.totalPhasePrice)}
+                  </div>
+                </div>
+              </div>
+
+              {/* Breakdown */}
+              <div className="p-4 border border-better-gray/20 rounded-lg">
+                <h3 className="font-bold text-lg text-better-black mb-3">Detalhamento do Investimento</h3>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span>Plano Base ({selectedModel.name}):</span>
+                    <span className="font-medium">{formatCurrency(pricing.coursePrice.totalPrice)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Fases do Roadmap ({selectedPhases.length} fases):</span>
+                    <span className="font-medium">{formatCurrency(pricing.phasePrice.totalPhasePrice)}</span>
+                  </div>
+                  <div className="border-t pt-2 flex justify-between font-bold text-lg">
+                    <span>Total do Projeto:</span>
+                    <span className="text-better-azure">{formatCurrency(pricing.finalTotalPrice)}</span>
+                  </div>
+                  <div className="flex justify-between text-xs text-better-gray">
+                    <span>Investimento médio por professor:</span>
+                    <span>{formatCurrency(pricing.finalTotalPrice / studentCount)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter className="gap-3">
+              <Button variant="outline" onClick={() => setShowPreviewModal(false)}>
+                Fechar Previsão
+              </Button>
+              <Button 
+                onClick={() => {
+                  setShowPreviewModal(false)
+                  setShowProposal(true)
+                }}
+                className="bg-better-green hover:bg-better-azure text-better-black"
+              >
+                Prosseguir para PDF
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Original Proposal Form Modal */}
+        <Dialog open={showProposal} onOpenChange={setShowProposal}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Dados para Geração do PDF</DialogTitle>
+              <DialogDescription>
+                Preencha as informações do cliente para gerar a proposta oficial
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="modal-clientName">Nome do Cliente</Label>
+                <Input
+                  id="modal-clientName"
+                  value={proposalInfo.clientName}
+                  onChange={(e) => setProposalInfo(prev => ({...prev, clientName: e.target.value}))}
+                  placeholder="Ex: Secretaria de Educação"
+                />
+              </div>
+              <div>
+                <Label htmlFor="modal-schoolName">Instituição/Escola</Label>
+                <Input
+                  id="modal-schoolName"
+                  value={proposalInfo.schoolName}
+                  onChange={(e) => setProposalInfo(prev => ({...prev, schoolName: e.target.value}))}
+                  placeholder="Ex: Colégio Bandeirantes"
+                />
+              </div>
+              <div>
+                <Label htmlFor="modal-cityState">Cidade/Estado</Label>
+                <Input
+                  id="modal-cityState"
+                  value={proposalInfo.cityState}
+                  onChange={(e) => setProposalInfo(prev => ({...prev, cityState: e.target.value}))}
+                  placeholder="Ex: São Paulo/SP"
+                />
+              </div>
+              <div>
+                <Label htmlFor="modal-contactPerson">Pessoa de Contato</Label>
+                <Input
+                  id="modal-contactPerson"
+                  value={proposalInfo.contactPerson}
+                  onChange={(e) => setProposalInfo(prev => ({...prev, contactPerson: e.target.value}))}
+                  placeholder="Ex: Maria Silva"
+                />
+              </div>
+              <div>
+                <Label htmlFor="modal-email">E-mail</Label>
+                <Input
+                  id="modal-email"
+                  type="email"
+                  value={proposalInfo.email}
+                  onChange={(e) => setProposalInfo(prev => ({...prev, email: e.target.value}))}
+                  placeholder="Ex: maria@escola.com.br"
+                />
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowProposal(false)}>
+                Cancelar
+              </Button>
+              <Button 
+                onClick={() => {
+                  generateProposal()
+                  setShowProposal(false)
+                }}
+                className="bg-better-green hover:bg-better-azure text-better-black"
+              >
+                Gerar PDF
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )
