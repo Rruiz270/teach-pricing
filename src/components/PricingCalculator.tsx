@@ -9,11 +9,11 @@ import { Slider } from '@/components/ui/slider'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
-import { courseModels, calculateTotalPrice, phaseModels, calculateTieredPrice, type CourseModel } from '@/lib/pricing-models'
+import { courseModels, calculateTotalPrice, phaseModels, calculateTieredPrice, type CourseModel, type PhaseModel } from '@/lib/pricing-models'
 import { formatCurrency, formatNumber } from '@/lib/utils'
 import { generateProposalPDF } from '@/lib/pdf-generator'
 import RoadmapSelector from '@/components/RoadmapSelector'
-import { Calculator, Download, Users, BookOpen, Award, Clock, ChevronDown, ChevronUp, FileText, Settings, Shield } from 'lucide-react'
+import { Calculator, Download, Users, BookOpen, Award, Clock, ChevronDown, ChevronUp, FileText, Settings, Shield, MapPin } from 'lucide-react'
 
 interface ProposalInfo {
   clientName: string
@@ -45,10 +45,11 @@ export default function PricingCalculator() {
   const [isAdmin, setIsAdmin] = useState(true) // TODO: Replace with real auth logic
   const [editingModels, setEditingModels] = useState<CourseModel[]>(courseModels)
   const [activeCourseModels, setActiveCourseModels] = useState<CourseModel[]>(courseModels)
+  const [editingPhases, setEditingPhases] = useState<PhaseModel[]>(phaseModels)
+  const [activePhaseModels, setActivePhaseModels] = useState<PhaseModel[]>(phaseModels)
   const [selectedPhases, setSelectedPhases] = useState<string[]>(['fase0'])
   const [manualPricing, setManualPricing] = useState<{ [phaseId: string]: { [lineId: string]: number } }>({})
   const [phaseTeacherCounts, setPhaseTeacherCounts] = useState<{ [phaseId: string]: { [lineId: string]: number } }>({})
-  const [asyncTeacherCount, setAsyncTeacherCount] = useState<number>(studentCount)
 
   // Load custom models from localStorage on component mount
   useEffect(() => {
@@ -63,14 +64,21 @@ export default function PricingCalculator() {
         console.error('Error loading custom models:', error)
       }
     }
+    
+    const savedPhases = localStorage.getItem('customPhaseModels')
+    if (savedPhases) {
+      try {
+        const parsedPhases = JSON.parse(savedPhases)
+        setActivePhaseModels(parsedPhases)
+        setEditingPhases(parsedPhases)
+      } catch (error) {
+        console.error('Error loading custom phases:', error)
+      }
+    }
   }, [])
 
-  // Sync async teacher count with main student count
-  useEffect(() => {
-    setAsyncTeacherCount(studentCount)
-  }, [studentCount])
 
-  const pricing = calculateTotalPrice(selectedModel.id, studentCount, selectedPhases, extraFeatures, manualPricing, phaseTeacherCounts, asyncTeacherCount)
+  const pricing = calculateTotalPrice(selectedModel.id, studentCount, selectedPhases, extraFeatures, manualPricing, phaseTeacherCounts)
 
   const handleStudentCountChange = (value: string) => {
     if (value === '') {
@@ -276,70 +284,6 @@ export default function PricingCalculator() {
                                 </div>
                               </div>
                               
-                              {/* Async Platform Tiers Editing */}
-                              <div>
-                                <Label>Aulas Assíncronas - Níveis de Preço</Label>
-                                <div className="space-y-2 mt-2">
-                                  {(model.asyncPlatformTiers || []).map((tier, tierIndex) => (
-                                    <div key={tierIndex} className="grid grid-cols-3 gap-2 p-2 bg-blue-50 rounded">
-                                      <Input
-                                        type="number"
-                                        placeholder="Min professores"
-                                        value={tier.minTeachers}
-                                        onChange={(e) => {
-                                          const newModels = [...editingModels]
-                                          if (!newModels[index].asyncPlatformTiers) {
-                                            newModels[index].asyncPlatformTiers = []
-                                          }
-                                          newModels[index].asyncPlatformTiers![tierIndex].minTeachers = parseInt(e.target.value) || 0
-                                          setEditingModels(newModels)
-                                        }}
-                                      />
-                                      <Input
-                                        type="number"
-                                        placeholder="Max (ou vazio)"
-                                        value={tier.maxTeachers || ''}
-                                        onChange={(e) => {
-                                          const newModels = [...editingModels]
-                                          newModels[index].asyncPlatformTiers![tierIndex].maxTeachers = e.target.value ? parseInt(e.target.value) : null
-                                          setEditingModels(newModels)
-                                        }}
-                                      />
-                                      <Input
-                                        type="number"
-                                        placeholder="Preço por professor"
-                                        value={tier.pricePerTeacher}
-                                        onChange={(e) => {
-                                          const newModels = [...editingModels]
-                                          newModels[index].asyncPlatformTiers![tierIndex].pricePerTeacher = parseInt(e.target.value) || 0
-                                          setEditingModels(newModels)
-                                        }}
-                                      />
-                                    </div>
-                                  ))}
-                                  <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => {
-                                      const newModels = [...editingModels]
-                                      if (!newModels[index].asyncPlatformTiers) {
-                                        newModels[index].asyncPlatformTiers = []
-                                      }
-                                      newModels[index].asyncPlatformTiers!.push({
-                                        minTeachers: 1,
-                                        maxTeachers: 1000,
-                                        pricePerTeacher: 10
-                                      })
-                                      setEditingModels(newModels)
-                                    }}
-                                    className="text-better-azure hover:text-better-green"
-                                  >
-                                    + Adicionar Nível Assíncrono
-                                  </Button>
-                                </div>
-                              </div>
-                              
                               {/* Course Features Editing */}
                               <div>
                                 <Label>Características do Curso</Label>
@@ -401,9 +345,11 @@ export default function PricingCalculator() {
                         onClick={() => {
                           // Save changes to localStorage for persistence
                           localStorage.setItem('customCourseModels', JSON.stringify(editingModels))
+                          localStorage.setItem('customPhaseModels', JSON.stringify(editingPhases))
                           
                           // Update active models
                           setActiveCourseModels(editingModels)
+                          setActivePhaseModels(editingPhases)
                           
                           // Update the selected model if it was modified
                           const updatedSelectedModel = editingModels.find(model => model.id === selectedModel.id)
@@ -412,7 +358,7 @@ export default function PricingCalculator() {
                           }
                           
                           setShowAdminModal(false)
-                          alert('Alterações salvas com sucesso! As mudanças foram aplicadas.')
+                          alert('Alterações salvas com sucesso! As mudanças foram aplicadas aos modelos e fases.')
                         }}
                       >
                         Salvar Alterações
@@ -548,68 +494,6 @@ export default function PricingCalculator() {
               </CardContent>
             </Card>
 
-            {/* Async Platform Configuration */}
-            {selectedModel.asyncPlatformTiers && (
-              <Card className="shadow-lg border-better-gray/20 bg-gradient-to-br from-better-white to-gray-50/50">
-                <CardHeader className="bg-gradient-to-r from-better-azure/10 to-better-green/5 rounded-t-lg">
-                  <CardTitle className="flex items-center gap-2 text-better-black">
-                    <BookOpen className="w-5 h-5 text-better-azure" />
-                    Aulas Assíncronas
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-4">
-                      <Input
-                        type="number"
-                        value={asyncTeacherCount}
-                        onChange={(e) => {
-                          const value = e.target.value
-                          if (value === '') {
-                            setAsyncTeacherCount(0)
-                          } else {
-                            setAsyncTeacherCount(Math.max(0, Math.min(parseInt(value) || 0, 50000)))
-                          }
-                        }}
-                        onFocus={(e) => e.target.select()}
-                        className="w-32"
-                        min="0"
-                        max="50000"
-                      />
-                      <span className="text-sm text-gray-600">professores para aulas assíncronas</span>
-                    </div>
-                    <Slider
-                      value={[asyncTeacherCount]}
-                      onValueChange={(value) => setAsyncTeacherCount(value[0])}
-                      max={50000}
-                      min={0}
-                      step={1}
-                      className="w-full"
-                    />
-                    <div className="flex justify-between text-xs text-gray-500">
-                      <span>0</span>
-                      <span>50.000</span>
-                    </div>
-                    {selectedModel.asyncPlatformTiers && asyncTeacherCount > 0 && (() => {
-                      const tier = selectedModel.asyncPlatformTiers.find(t => 
-                        asyncTeacherCount >= t.minTeachers && 
-                        (t.maxTeachers === null || asyncTeacherCount <= t.maxTeachers)
-                      )
-                      return tier ? (
-                        <div className="text-xs text-gray-500 bg-blue-50 p-2 rounded">
-                          <strong>Faixa atual:</strong> {tier.minTeachers.toLocaleString('pt-BR')} a {tier.maxTeachers?.toLocaleString('pt-BR') || '+'} professores
-                          <br />
-                          <strong>Preço:</strong> {formatCurrency(tier.pricePerTeacher)}/professor
-                          <br />
-                          <strong>Total aulas assíncronas:</strong> {formatCurrency(tier.pricePerTeacher * asyncTeacherCount)}
-                        </div>
-                      ) : null
-                    })()}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
             {/* Roadmap Selector */}
             <RoadmapSelector
               selectedPhases={selectedPhases}
@@ -661,14 +545,8 @@ export default function PricingCalculator() {
                   <div className="border-t pt-2 space-y-2">
                     <div className="flex justify-between">
                       <span>Plano base:</span>
-                      <span>{formatCurrency(pricing.coursePrice.basePrice)}</span>
+                      <span>{formatCurrency(pricing.coursePrice.totalPrice)}</span>
                     </div>
-                    {pricing.coursePrice.asyncPrice > 0 && (
-                      <div className="flex justify-between">
-                        <span>Aulas assíncronas:</span>
-                        <span>{formatCurrency(pricing.coursePrice.asyncPrice)}</span>
-                      </div>
-                    )}
                     <div className="flex justify-between">
                       <span>Fases do roadmap:</span>
                       <span>{formatCurrency(pricing.phasePrice.totalPhasePrice)}</span>
@@ -826,14 +704,8 @@ export default function PricingCalculator() {
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span>Plano Base ({selectedModel.name}):</span>
-                    <span className="font-medium">{formatCurrency(pricing.coursePrice.basePrice)}</span>
+                    <span className="font-medium">{formatCurrency(pricing.coursePrice.totalPrice)}</span>
                   </div>
-                  {pricing.coursePrice.asyncPrice > 0 && (
-                    <div className="flex justify-between">
-                      <span>Aulas Assíncronas ({asyncTeacherCount.toLocaleString('pt-BR')} professores):</span>
-                      <span className="font-medium">{formatCurrency(pricing.coursePrice.asyncPrice)}</span>
-                    </div>
-                  )}
                   <div className="flex justify-between">
                     <span>Fases do Roadmap ({selectedPhases.length} fases):</span>
                     <span className="font-medium">{formatCurrency(pricing.phasePrice.totalPhasePrice)}</span>
