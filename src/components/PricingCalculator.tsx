@@ -78,7 +78,7 @@ export default function PricingCalculator() {
   }, [])
 
 
-  const pricing = calculateTotalPrice(selectedModel.id, studentCount, selectedPhases, extraFeatures, manualPricing, phaseTeacherCounts)
+  const pricing = calculateTotalPrice(selectedModel.id, studentCount, selectedPhases, extraFeatures, manualPricing, phaseTeacherCounts, activePhaseModels)
 
   const handleStudentCountChange = (value: string) => {
     if (value === '') {
@@ -107,7 +107,7 @@ export default function PricingCalculator() {
   }
 
   const handleSelectAllPhases = () => {
-    setSelectedPhases(phaseModels.map(phase => phase.id))
+    setSelectedPhases(activePhaseModels.map(phase => phase.id))
   }
 
   const handleClearAllPhases = () => {
@@ -505,6 +505,7 @@ export default function PricingCalculator() {
               onUpdateManualPricing={handleUpdateManualPricing}
               phaseTeacherCounts={phaseTeacherCounts}
               onUpdatePhaseTeacherCount={handleUpdatePhaseTeacherCount}
+              phaseModels={activePhaseModels}
             />
 
           </div>

@@ -434,14 +434,16 @@ export function calculatePhasePrice(
   selectedPhases: string[],
   studentCount: number,
   manualPricing: { [phaseId: string]: { [lineId: string]: number } } = {},
-  phaseTeacherCounts: { [phaseId: string]: { [lineId: string]: number } } = {}
+  phaseTeacherCounts: { [phaseId: string]: { [lineId: string]: number } } = {},
+  customPhaseModels?: PhaseModel[]
 ): {
   phasePrice: number;
   totalPhasePrice: number;
   pricePerStudentPhase: number;
   selectedPhaseModels: PhaseModel[];
 } {
-  const selectedPhaseModels = phaseModels.filter(phase => selectedPhases.includes(phase.id));
+  const phaseModelsToUse = customPhaseModels || phaseModels;
+  const selectedPhaseModels = phaseModelsToUse.filter(phase => selectedPhases.includes(phase.id));
   
   let totalPhasePrice = 0;
   
@@ -480,7 +482,8 @@ export function calculateTotalPrice(
   selectedPhases: string[],
   extraFeatures: { [key: string]: number } = {},
   manualPricing: { [phaseId: string]: { [lineId: string]: number } } = {},
-  phaseTeacherCounts: { [phaseId: string]: { [lineId: string]: number } } = {}
+  phaseTeacherCounts: { [phaseId: string]: { [lineId: string]: number } } = {},
+  customPhaseModels?: PhaseModel[]
 ): {
   coursePrice: ReturnType<typeof calculatePrice>;
   phasePrice: ReturnType<typeof calculatePhasePrice>;
@@ -492,7 +495,7 @@ export function calculateTotalPrice(
   };
 } {
   const coursePrice = calculatePrice(modelId, studentCount, extraFeatures);
-  const phasePrice = calculatePhasePrice(selectedPhases, studentCount, manualPricing, phaseTeacherCounts);
+  const phasePrice = calculatePhasePrice(selectedPhases, studentCount, manualPricing, phaseTeacherCounts, customPhaseModels);
   
   const finalTotalPrice = coursePrice.totalPrice + phasePrice.totalPhasePrice;
   

@@ -18,6 +18,7 @@ interface RoadmapSelectorProps {
   onUpdateManualPricing: (phaseId: string, lineId: string, value: number) => void
   phaseTeacherCounts: { [phaseId: string]: { [lineId: string]: number } }
   onUpdatePhaseTeacherCount: (phaseId: string, lineId: string, count: number) => void
+  phaseModels: PhaseModel[]
 }
 
 export default function RoadmapSelector({ 
@@ -29,7 +30,8 @@ export default function RoadmapSelector({
   manualPricing,
   onUpdateManualPricing,
   phaseTeacherCounts,
-  onUpdatePhaseTeacherCount
+  onUpdatePhaseTeacherCount,
+  phaseModels
 }: RoadmapSelectorProps) {
   const [selectedPhaseForModal, setSelectedPhaseForModal] = useState<PhaseModel | null>(null)
   const isPhaseSelected = (phaseId: string) => selectedPhases.includes(phaseId)
