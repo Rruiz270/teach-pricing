@@ -16,8 +16,8 @@ interface RoadmapSelectorProps {
   studentCount: number
   manualPricing: { [phaseId: string]: { [lineId: string]: number } }
   onUpdateManualPricing: (phaseId: string, lineId: string, value: number) => void
-  phaseTeacherCounts: { [phaseId: string]: number }
-  onUpdatePhaseTeacherCount: (phaseId: string, count: number) => void
+  phaseTeacherCounts: { [phaseId: string]: { [lineId: string]: number } }
+  onUpdatePhaseTeacherCount: (phaseId: string, lineId: string, count: number) => void
 }
 
 export default function RoadmapSelector({ 
@@ -176,10 +176,10 @@ export default function RoadmapSelector({
               onUpdateManualPricing(selectedPhaseForModal.id, lineId, value)
             }
           }}
-          phaseTeacherCount={phaseTeacherCounts[selectedPhaseForModal?.id || ''] || studentCount}
-          onUpdatePhaseTeacherCount={(count) => {
+          phaseTeacherCounts={phaseTeacherCounts[selectedPhaseForModal?.id || ''] || {}}
+          onUpdatePhaseTeacherCounts={(lineId, count) => {
             if (selectedPhaseForModal) {
-              onUpdatePhaseTeacherCount(selectedPhaseForModal.id, count)
+              onUpdatePhaseTeacherCount(selectedPhaseForModal.id, lineId, count)
             }
           }}
         />

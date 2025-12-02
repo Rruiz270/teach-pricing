@@ -103,26 +103,6 @@ export const courseModels: CourseModel[] = [
       { minStudents: 1, maxStudents: 50, pricePerStudent: 450 },
       { minStudents: 51, maxStudents: 100, pricePerStudent: 420 },
       { minStudents: 101, maxStudents: null, pricePerStudent: 390 }
-    ],
-    extraFeatures: [
-      {
-        id: "extra-schools",
-        name: "Escolas-Piloto Extras",
-        description: "Adicione mais escolas ao programa piloto",
-        pricePerStudent: 35
-      },
-      {
-        id: "extra-training",
-        name: "Treinamento Especializado",
-        description: "Módulos de treinamento especializados adicionais",
-        pricePerStudent: 25
-      },
-      {
-        id: "infrastructure-upgrade",
-        name: "Upgrade de Infraestrutura",
-        description: "Melhorias tecnológicas avançadas",
-        pricePerStudent: 55
-      }
     ]
   }
 ];
@@ -418,7 +398,7 @@ export function calculatePhasePrice(
   selectedPhases: string[],
   studentCount: number,
   manualPricing: { [phaseId: string]: { [lineId: string]: number } } = {},
-  phaseTeacherCounts: { [phaseId: string]: number } = {}
+  phaseTeacherCounts: { [phaseId: string]: { [lineId: string]: number } } = {}
 ): {
   phasePrice: number;
   totalPhasePrice: number;
@@ -431,18 +411,19 @@ export function calculatePhasePrice(
   
   selectedPhaseModels.forEach(phase => {
     let phaseTotal = 0;
-    const teacherCountForPhase = phaseTeacherCounts[phase.id] || studentCount;
     
     phase.pricingLines.forEach(line => {
+      const teacherCountForLine = phaseTeacherCounts[phase.id]?.[line.id] || studentCount;
+      
       if (line.type === 'per_student' && line.pricePerStudent) {
-        phaseTotal += line.pricePerStudent * teacherCountForPhase;
+        phaseTotal += line.pricePerStudent * teacherCountForLine;
       } else if (line.type === 'fixed' && line.fixedPrice) {
         phaseTotal += line.fixedPrice;
       } else if (line.type === 'manual') {
         const manualPrice = manualPricing[phase.id]?.[line.id] || line.fixedPrice || 0;
         phaseTotal += manualPrice;
       } else if (line.type === 'tiered' && line.tiers) {
-        phaseTotal += calculateTieredPrice(line.tiers, teacherCountForPhase);
+        phaseTotal += calculateTieredPrice(line.tiers, teacherCountForLine);
       }
     });
     
@@ -463,7 +444,7 @@ export function calculateTotalPrice(
   selectedPhases: string[],
   extraFeatures: { [key: string]: number } = {},
   manualPricing: { [phaseId: string]: { [lineId: string]: number } } = {},
-  phaseTeacherCounts: { [phaseId: string]: number } = {}
+  phaseTeacherCounts: { [phaseId: string]: { [lineId: string]: number } } = {}
 ): {
   coursePrice: ReturnType<typeof calculatePrice>;
   phasePrice: ReturnType<typeof calculatePhasePrice>;

@@ -46,7 +46,7 @@ export default function PricingCalculator() {
   const [activeCourseModels, setActiveCourseModels] = useState<CourseModel[]>(courseModels)
   const [selectedPhases, setSelectedPhases] = useState<string[]>(['fase0'])
   const [manualPricing, setManualPricing] = useState<{ [phaseId: string]: { [lineId: string]: number } }>({})
-  const [phaseTeacherCounts, setPhaseTeacherCounts] = useState<{ [phaseId: string]: number }>({})
+  const [phaseTeacherCounts, setPhaseTeacherCounts] = useState<{ [phaseId: string]: { [lineId: string]: number } }>({})
 
   // Load custom models from localStorage on component mount
   useEffect(() => {
@@ -105,10 +105,13 @@ export default function PricingCalculator() {
     }))
   }
 
-  const handleUpdatePhaseTeacherCount = (phaseId: string, count: number) => {
+  const handleUpdatePhaseTeacherCount = (phaseId: string, lineId: string, count: number) => {
     setPhaseTeacherCounts(prev => ({
       ...prev,
-      [phaseId]: Math.min(Math.max(1, count), studentCount)
+      [phaseId]: {
+        ...prev[phaseId],
+        [lineId]: Math.min(Math.max(1, count), 50000)
+      }
     }))
   }
 
@@ -308,96 +311,6 @@ export default function PricingCalculator() {
                                 </div>
                               </div>
                               
-                              {/* Extra Features Editing (for Premium course) */}
-                              {model.extraFeatures && (
-                                <div>
-                                  <Label>Recursos Adicionais</Label>
-                                  <div className="space-y-3 mt-2">
-                                    {model.extraFeatures.map((extraFeature, extraIndex) => (
-                                      <div key={extraFeature.id} className="p-3 border rounded-lg bg-gray-50 space-y-2">
-                                        <div className="grid grid-cols-2 gap-2">
-                                          <div>
-                                            <Label className="text-xs">Nome do Recurso</Label>
-                                            <Input
-                                              value={extraFeature.name}
-                                              onChange={(e) => {
-                                                const newModels = [...editingModels]
-                                                newModels[index].extraFeatures![extraIndex].name = e.target.value
-                                                setEditingModels(newModels)
-                                              }}
-                                              placeholder="Nome do recurso..."
-                                              className="text-sm"
-                                            />
-                                          </div>
-                                          <div>
-                                            <Label className="text-xs">Preço por Professor</Label>
-                                            <Input
-                                              type="number"
-                                              value={extraFeature.pricePerStudent || ''}
-                                              onChange={(e) => {
-                                                const newModels = [...editingModels]
-                                                newModels[index].extraFeatures![extraIndex].pricePerStudent = parseInt(e.target.value) || 0
-                                                setEditingModels(newModels)
-                                              }}
-                                              placeholder="0"
-                                              className="text-sm"
-                                            />
-                                          </div>
-                                        </div>
-                                        <div>
-                                          <Label className="text-xs">Descrição</Label>
-                                          <Input
-                                            value={extraFeature.description}
-                                            onChange={(e) => {
-                                              const newModels = [...editingModels]
-                                              newModels[index].extraFeatures![extraIndex].description = e.target.value
-                                              setEditingModels(newModels)
-                                            }}
-                                            placeholder="Descrição do recurso adicional..."
-                                            className="text-sm"
-                                          />
-                                        </div>
-                                        <div className="flex justify-end">
-                                          <Button
-                                            type="button"
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => {
-                                              const newModels = [...editingModels]
-                                              newModels[index].extraFeatures!.splice(extraIndex, 1)
-                                              setEditingModels(newModels)
-                                            }}
-                                            className="text-red-600 hover:text-red-700 text-xs"
-                                          >
-                                            Remover Recurso
-                                          </Button>
-                                        </div>
-                                      </div>
-                                    ))}
-                                    <Button
-                                      type="button"
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => {
-                                        const newModels = [...editingModels]
-                                        if (!newModels[index].extraFeatures) {
-                                          newModels[index].extraFeatures = []
-                                        }
-                                        newModels[index].extraFeatures!.push({
-                                          id: `extra-${Date.now()}`,
-                                          name: 'Novo Recurso',
-                                          description: 'Descrição do novo recurso',
-                                          pricePerStudent: 0
-                                        })
-                                        setEditingModels(newModels)
-                                      }}
-                                      className="text-better-azure hover:text-better-green"
-                                    >
-                                      + Adicionar Recurso Adicional
-                                    </Button>
-                                  </div>
-                                </div>
-                              )}
                             </div>
                           ))}
                         </CardContent>
@@ -539,6 +452,7 @@ export default function PricingCalculator() {
                       onChange={(e) => handleStudentCountChange(e.target.value)}
                       className="w-32"
                       min="1"
+                      max="50000"
                     />
                     <span className="text-sm text-gray-600">professores</span>
                   </div>
@@ -571,41 +485,6 @@ export default function PricingCalculator() {
               onUpdatePhaseTeacherCount={handleUpdatePhaseTeacherCount}
             />
 
-            {/* Extra Features */}
-            {selectedModel.extraFeatures && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Clock className="w-5 h-5" />
-                    Recursos Adicionais
-                  </CardTitle>
-                  <CardDescription>
-                    Personalize ainda mais a oferta com recursos extras
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {selectedModel.extraFeatures.map((feature) => (
-                    <div key={feature.id} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div className="flex-1">
-                        <h4 className="font-medium">{feature.name}</h4>
-                        <p className="text-sm text-gray-600">{feature.description}</p>
-                        <p className="text-xs text-blue-600 mt-1">
-                          {feature.pricePerStudent && `+${formatCurrency(feature.pricePerStudent)}/professor`}
-                          {feature.fixedPrice && `+${formatCurrency(feature.fixedPrice)} fixo`}
-                        </p>
-                      </div>
-                      <Input
-                        type="number"
-                        value={extraFeatures[feature.id] || 0}
-                        onChange={(e) => handleExtraFeatureChange(feature.id, parseInt(e.target.value) || 0)}
-                        className="w-20"
-                        min="0"
-                      />
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            )}
           </div>
 
           {/* Pricing Summary & Proposal */}
