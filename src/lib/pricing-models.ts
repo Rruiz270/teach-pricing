@@ -20,12 +20,19 @@ export interface CourseModel {
   }[];
 }
 
+export interface PricingTierLine {
+  minTeachers: number;
+  maxTeachers: number | null;
+  pricePerTeacher: number;
+}
+
 export interface PhasePricingLine {
   id: string;
   name: string;
-  type: 'per_student' | 'fixed' | 'manual';
+  type: 'per_student' | 'fixed' | 'manual' | 'tiered';
   pricePerStudent?: number;
   fixedPrice?: number;
+  tiers?: PricingTierLine[];
   editable: boolean;
 }
 
@@ -134,15 +141,25 @@ export const phaseModels: PhaseModel[] = [
       {
         id: "async_platform",
         name: "Assíncrono Plataforma",
-        type: "per_student",
-        pricePerStudent: 15,
+        type: "tiered",
+        tiers: [
+          { minTeachers: 1, maxTeachers: 5000, pricePerTeacher: 20 },
+          { minTeachers: 5001, maxTeachers: 15000, pricePerTeacher: 18 },
+          { minTeachers: 15001, maxTeachers: 30000, pricePerTeacher: 15 },
+          { minTeachers: 30001, maxTeachers: null, pricePerTeacher: 12 }
+        ],
         editable: false
       },
       {
         id: "ambassador_training",
         name: "Treinamento de Embaixadores",
-        type: "per_student",
-        pricePerStudent: 25,
+        type: "tiered",
+        tiers: [
+          { minTeachers: 1, maxTeachers: 50, pricePerTeacher: 500 },
+          { minTeachers: 51, maxTeachers: 200, pricePerTeacher: 400 },
+          { minTeachers: 201, maxTeachers: 500, pricePerTeacher: 350 },
+          { minTeachers: 501, maxTeachers: null, pricePerTeacher: 300 }
+        ],
         editable: false
       },
       {
@@ -167,15 +184,25 @@ export const phaseModels: PhaseModel[] = [
       {
         id: "async_platform",
         name: "Assíncrono Plataforma",
-        type: "per_student",
-        pricePerStudent: 20,
+        type: "tiered",
+        tiers: [
+          { minTeachers: 1, maxTeachers: 5000, pricePerTeacher: 25 },
+          { minTeachers: 5001, maxTeachers: 15000, pricePerTeacher: 22 },
+          { minTeachers: 15001, maxTeachers: 30000, pricePerTeacher: 19 },
+          { minTeachers: 30001, maxTeachers: null, pricePerTeacher: 16 }
+        ],
         editable: false
       },
       {
         id: "ambassador_training",
         name: "Treinamento de Embaixadores",
-        type: "per_student",
-        pricePerStudent: 30,
+        type: "tiered",
+        tiers: [
+          { minTeachers: 1, maxTeachers: 50, pricePerTeacher: 600 },
+          { minTeachers: 51, maxTeachers: 200, pricePerTeacher: 500 },
+          { minTeachers: 201, maxTeachers: 500, pricePerTeacher: 450 },
+          { minTeachers: 501, maxTeachers: null, pricePerTeacher: 400 }
+        ],
         editable: false
       },
       {
@@ -200,15 +227,25 @@ export const phaseModels: PhaseModel[] = [
       {
         id: "async_platform",
         name: "Assíncrono Plataforma",
-        type: "per_student",
-        pricePerStudent: 25,
+        type: "tiered",
+        tiers: [
+          { minTeachers: 1, maxTeachers: 5000, pricePerTeacher: 30 },
+          { minTeachers: 5001, maxTeachers: 15000, pricePerTeacher: 27 },
+          { minTeachers: 15001, maxTeachers: 30000, pricePerTeacher: 24 },
+          { minTeachers: 30001, maxTeachers: null, pricePerTeacher: 20 }
+        ],
         editable: false
       },
       {
         id: "ambassador_training",
         name: "Treinamento de Embaixadores",
-        type: "per_student",
-        pricePerStudent: 35,
+        type: "tiered",
+        tiers: [
+          { minTeachers: 1, maxTeachers: 50, pricePerTeacher: 700 },
+          { minTeachers: 51, maxTeachers: 200, pricePerTeacher: 600 },
+          { minTeachers: 201, maxTeachers: 500, pricePerTeacher: 550 },
+          { minTeachers: 501, maxTeachers: null, pricePerTeacher: 500 }
+        ],
         editable: false
       },
       {
@@ -233,8 +270,13 @@ export const phaseModels: PhaseModel[] = [
       {
         id: "training",
         name: "Treinamento",
-        type: "per_student",
-        pricePerStudent: 40,
+        type: "tiered",
+        tiers: [
+          { minTeachers: 1, maxTeachers: 50, pricePerTeacher: 800 },
+          { minTeachers: 51, maxTeachers: 200, pricePerTeacher: 650 },
+          { minTeachers: 201, maxTeachers: 500, pricePerTeacher: 550 },
+          { minTeachers: 501, maxTeachers: null, pricePerTeacher: 450 }
+        ],
         editable: false
       },
       {
@@ -259,8 +301,13 @@ export const phaseModels: PhaseModel[] = [
       {
         id: "training",
         name: "Treinamento",
-        type: "per_student",
-        pricePerStudent: 50,
+        type: "tiered",
+        tiers: [
+          { minTeachers: 1, maxTeachers: 50, pricePerTeacher: 900 },
+          { minTeachers: 51, maxTeachers: 200, pricePerTeacher: 750 },
+          { minTeachers: 201, maxTeachers: 500, pricePerTeacher: 650 },
+          { minTeachers: 501, maxTeachers: null, pricePerTeacher: 550 }
+        ],
         editable: false
       },
       {
@@ -285,8 +332,13 @@ export const phaseModels: PhaseModel[] = [
       {
         id: "training",
         name: "Treinamento",
-        type: "per_student",
-        pricePerStudent: 65,
+        type: "tiered",
+        tiers: [
+          { minTeachers: 1, maxTeachers: 50, pricePerTeacher: 1000 },
+          { minTeachers: 51, maxTeachers: 200, pricePerTeacher: 850 },
+          { minTeachers: 201, maxTeachers: 500, pricePerTeacher: 750 },
+          { minTeachers: 501, maxTeachers: null, pricePerTeacher: 650 }
+        ],
         editable: false
       },
       {
@@ -299,6 +351,14 @@ export const phaseModels: PhaseModel[] = [
     ]
   }
 ];
+
+export function calculateTieredPrice(tiers: PricingTierLine[], teacherCount: number): number {
+  const tier = tiers.find(t => 
+    teacherCount >= t.minTeachers && 
+    (t.maxTeachers === null || teacherCount <= t.maxTeachers)
+  );
+  return tier ? tier.pricePerTeacher * teacherCount : 0;
+}
 
 export function calculatePrice(
   modelId: string, 
@@ -357,7 +417,8 @@ export function calculatePrice(
 export function calculatePhasePrice(
   selectedPhases: string[],
   studentCount: number,
-  manualPricing: { [phaseId: string]: { [lineId: string]: number } } = {}
+  manualPricing: { [phaseId: string]: { [lineId: string]: number } } = {},
+  phaseTeacherCounts: { [phaseId: string]: number } = {}
 ): {
   phasePrice: number;
   totalPhasePrice: number;
@@ -370,15 +431,18 @@ export function calculatePhasePrice(
   
   selectedPhaseModels.forEach(phase => {
     let phaseTotal = 0;
+    const teacherCountForPhase = phaseTeacherCounts[phase.id] || studentCount;
     
     phase.pricingLines.forEach(line => {
       if (line.type === 'per_student' && line.pricePerStudent) {
-        phaseTotal += line.pricePerStudent * studentCount;
+        phaseTotal += line.pricePerStudent * teacherCountForPhase;
       } else if (line.type === 'fixed' && line.fixedPrice) {
         phaseTotal += line.fixedPrice;
       } else if (line.type === 'manual') {
         const manualPrice = manualPricing[phase.id]?.[line.id] || line.fixedPrice || 0;
         phaseTotal += manualPrice;
+      } else if (line.type === 'tiered' && line.tiers) {
+        phaseTotal += calculateTieredPrice(line.tiers, teacherCountForPhase);
       }
     });
     
@@ -398,7 +462,8 @@ export function calculateTotalPrice(
   studentCount: number,
   selectedPhases: string[],
   extraFeatures: { [key: string]: number } = {},
-  manualPricing: { [phaseId: string]: { [lineId: string]: number } } = {}
+  manualPricing: { [phaseId: string]: { [lineId: string]: number } } = {},
+  phaseTeacherCounts: { [phaseId: string]: number } = {}
 ): {
   coursePrice: ReturnType<typeof calculatePrice>;
   phasePrice: ReturnType<typeof calculatePhasePrice>;
@@ -410,7 +475,7 @@ export function calculateTotalPrice(
   };
 } {
   const coursePrice = calculatePrice(modelId, studentCount, extraFeatures);
-  const phasePrice = calculatePhasePrice(selectedPhases, studentCount, manualPricing);
+  const phasePrice = calculatePhasePrice(selectedPhases, studentCount, manualPricing, phaseTeacherCounts);
   
   const finalTotalPrice = coursePrice.totalPrice + phasePrice.totalPhasePrice;
   

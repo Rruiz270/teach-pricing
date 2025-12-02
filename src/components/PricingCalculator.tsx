@@ -46,6 +46,7 @@ export default function PricingCalculator() {
   const [activeCourseModels, setActiveCourseModels] = useState<CourseModel[]>(courseModels)
   const [selectedPhases, setSelectedPhases] = useState<string[]>(['fase0'])
   const [manualPricing, setManualPricing] = useState<{ [phaseId: string]: { [lineId: string]: number } }>({})
+  const [phaseTeacherCounts, setPhaseTeacherCounts] = useState<{ [phaseId: string]: number }>({})
 
   // Load custom models from localStorage on component mount
   useEffect(() => {
@@ -62,7 +63,7 @@ export default function PricingCalculator() {
     }
   }, [])
 
-  const pricing = calculateTotalPrice(selectedModel.id, studentCount, selectedPhases, extraFeatures, manualPricing)
+  const pricing = calculateTotalPrice(selectedModel.id, studentCount, selectedPhases, extraFeatures, manualPricing, phaseTeacherCounts)
 
   const handleStudentCountChange = (value: string) => {
     const count = parseInt(value) || 0
@@ -101,6 +102,13 @@ export default function PricingCalculator() {
         ...prev[phaseId],
         [lineId]: value
       }
+    }))
+  }
+
+  const handleUpdatePhaseTeacherCount = (phaseId: string, count: number) => {
+    setPhaseTeacherCounts(prev => ({
+      ...prev,
+      [phaseId]: Math.min(Math.max(1, count), studentCount)
     }))
   }
 
@@ -559,6 +567,8 @@ export default function PricingCalculator() {
               studentCount={studentCount}
               manualPricing={manualPricing}
               onUpdateManualPricing={handleUpdateManualPricing}
+              phaseTeacherCounts={phaseTeacherCounts}
+              onUpdatePhaseTeacherCount={handleUpdatePhaseTeacherCount}
             />
 
             {/* Extra Features */}

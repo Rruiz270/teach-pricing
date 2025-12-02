@@ -5,9 +5,9 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
-import { PhaseModel, PhasePricingLine } from '@/lib/pricing-models'
+import { PhaseModel, PhasePricingLine, calculateTieredPrice } from '@/lib/pricing-models'
 import { formatCurrency } from '@/lib/utils'
-import { Calculator, DollarSign, Users, Settings } from 'lucide-react'
+import { Calculator, DollarSign, Users, Settings, TrendingUp } from 'lucide-react'
 
 interface PhaseDetailModalProps {
   phase: PhaseModel | null
@@ -16,6 +16,8 @@ interface PhaseDetailModalProps {
   studentCount: number
   manualPricing: { [lineId: string]: number }
   onUpdateManualPricing: (lineId: string, value: number) => void
+  phaseTeacherCount: number
+  onUpdatePhaseTeacherCount: (count: number) => void
 }
 
 export default function PhaseDetailModal({
@@ -24,19 +26,33 @@ export default function PhaseDetailModal({
   onClose,
   studentCount,
   manualPricing,
-  onUpdateManualPricing
+  onUpdateManualPricing,
+  phaseTeacherCount,
+  onUpdatePhaseTeacherCount
 }: PhaseDetailModalProps) {
   if (!phase) return null
 
   const calculateLineTotal = (line: PhasePricingLine): number => {
     if (line.type === 'per_student' && line.pricePerStudent) {
-      return line.pricePerStudent * studentCount
+      return line.pricePerStudent * phaseTeacherCount
     } else if (line.type === 'fixed' && line.fixedPrice) {
       return line.fixedPrice
     } else if (line.type === 'manual') {
       return manualPricing[line.id] || line.fixedPrice || 0
+    } else if (line.type === 'tiered' && line.tiers) {
+      return calculateTieredPrice(line.tiers, phaseTeacherCount)
     }
     return 0
+  }
+
+  const getTierForCount = (line: PhasePricingLine) => {
+    if (line.type === 'tiered' && line.tiers) {
+      return line.tiers.find(t => 
+        phaseTeacherCount >= t.minTeachers && 
+        (t.maxTeachers === null || phaseTeacherCount <= t.maxTeachers)
+      )
+    }
+    return null
   }
 
   const totalPhasePrice = phase.pricingLines.reduce((total, line) => total + calculateLineTotal(line), 0)
@@ -71,16 +87,39 @@ export default function PhaseDetailModal({
             <p className="text-better-gray">{phase.description}</p>
           </div>
 
-          {/* Professor Count Info */}
-          <div className="flex items-center gap-3 p-4 bg-better-white border border-better-gray/20 rounded-lg">
-            <Users className="w-5 h-5 text-better-green" />
-            <div>
-              <Label className="text-sm font-medium text-better-black">
-                Número de Professores
-              </Label>
-              <div className="text-2xl font-bold text-better-green">
-                {studentCount.toLocaleString('pt-BR')}
+          {/* Teacher Count Input */}
+          <div className="p-4 bg-better-white border border-better-gray/20 rounded-lg">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-better-green" />
+                <Label className="text-sm font-medium text-better-black">
+                  Número de Professores para esta Fase
+                </Label>
               </div>
+              <div className="text-xs text-better-gray">
+                Total do projeto: {studentCount.toLocaleString('pt-BR')}
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <Input
+                type="number"
+                value={phaseTeacherCount}
+                onChange={(e) => onUpdatePhaseTeacherCount(parseInt(e.target.value) || 0)}
+                className="w-32"
+                min="1"
+                max={studentCount}
+                placeholder="Quantidade..."
+              />
+              <span className="text-sm text-better-gray">professores</span>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => onUpdatePhaseTeacherCount(studentCount)}
+                className="text-better-azure hover:text-better-green text-xs"
+              >
+                Usar total do projeto
+              </Button>
             </div>
           </div>
 
@@ -115,6 +154,25 @@ export default function PhaseDetailModal({
                         Valor editável
                       </p>
                     )}
+                    {line.type === 'tiered' && (
+                      <div className="text-sm text-better-gray">
+                        <div className="flex items-center gap-1 mb-1">
+                          <TrendingUp className="w-3 h-3" />
+                          <span>Preço escalonado</span>
+                        </div>
+                        {(() => {
+                          const currentTier = getTierForCount(line)
+                          return currentTier ? (
+                            <div className="text-xs text-better-azure font-medium">
+                              Faixa atual: {currentTier.minTeachers.toLocaleString('pt-BR')} a{' '}
+                              {currentTier.maxTeachers?.toLocaleString('pt-BR') || '+'} professores
+                              <br />
+                              Preço: {formatCurrency(currentTier.pricePerTeacher)} por professor
+                            </div>
+                          ) : null
+                        })()}
+                      </div>
+                    )}
                   </div>
                   <div className="text-right">
                     <div className="text-lg font-bold text-better-azure">
@@ -122,9 +180,17 @@ export default function PhaseDetailModal({
                     </div>
                     {line.type === 'per_student' && (
                       <div className="text-xs text-better-gray">
-                        {formatCurrency(line.pricePerStudent || 0)} × {studentCount.toLocaleString('pt-BR')}
+                        {formatCurrency(line.pricePerStudent || 0)} × {phaseTeacherCount.toLocaleString('pt-BR')}
                       </div>
                     )}
+                    {line.type === 'tiered' && (() => {
+                      const currentTier = getTierForCount(line)
+                      return currentTier ? (
+                        <div className="text-xs text-better-gray">
+                          {formatCurrency(currentTier.pricePerTeacher)} × {phaseTeacherCount.toLocaleString('pt-BR')}
+                        </div>
+                      ) : null
+                    })()}
                   </div>
                 </div>
 
@@ -163,9 +229,9 @@ export default function PhaseDetailModal({
                 <div className="text-3xl font-bold text-better-azure">
                   {formatCurrency(totalPhasePrice)}
                 </div>
-                {studentCount > 0 && (
+                {phaseTeacherCount > 0 && (
                   <div className="text-sm text-better-white/60 mt-2">
-                    Valor médio por professor: {formatCurrency(totalPhasePrice / studentCount)}
+                    Valor médio por professor: {formatCurrency(totalPhasePrice / phaseTeacherCount)}
                   </div>
                 )}
               </div>
