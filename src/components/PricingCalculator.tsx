@@ -47,6 +47,7 @@ export default function PricingCalculator() {
   const [activeCourseModels, setActiveCourseModels] = useState<CourseModel[]>(courseModels)
   const [editingPhases, setEditingPhases] = useState<PhaseModel[]>(phaseModels)
   const [activePhaseModels, setActivePhaseModels] = useState<PhaseModel[]>(phaseModels)
+  const [refreshKey, setRefreshKey] = useState<number>(0)
   const [selectedPhases, setSelectedPhases] = useState<string[]>(['fase0'])
   const [manualPricing, setManualPricing] = useState<{ [phaseId: string]: { [lineId: string]: number } }>({})
   const [phaseTeacherCounts, setPhaseTeacherCounts] = useState<{ [phaseId: string]: { [lineId: string]: number } }>({})
@@ -178,6 +179,7 @@ export default function PricingCalculator() {
                 <Dialog open={showAdminModal} onOpenChange={(open) => {
                   if (open) {
                     setEditingModels([...activeCourseModels])
+                    setEditingPhases([...activePhaseModels])
                   }
                   setShowAdminModal(open)
                 }}>
@@ -206,6 +208,74 @@ export default function PricingCalculator() {
                     </DialogHeader>
                     
                     <div className="space-y-6">
+                      {/* Phase Models Editor */}
+                      <Card className="border-better-gray/20">
+                        <CardHeader className="bg-gradient-to-r from-better-green/10 to-better-azure/5">
+                          <CardTitle className="flex items-center gap-2 text-better-black">
+                            <MapPin className="w-5 h-5 text-better-green" />
+                            Configuração de Fases - Preços Escalonados
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                          {editingPhases.map((phase, phaseIndex) => (
+                            <div key={phase.id} className="p-4 border rounded-lg space-y-4">
+                              <h3 className="font-bold text-lg text-better-black">{phase.name} - {phase.title}</h3>
+                              
+                              {phase.pricingLines.filter(line => line.type === 'tiered').map((line, lineIndex) => (
+                                <div key={line.id} className="p-3 bg-blue-50 rounded-lg space-y-3">
+                                  <h4 className="font-medium text-better-black">{line.name}</h4>
+                                  <div className="space-y-2">
+                                    {line.tiers?.map((tier, tierIndex) => (
+                                      <div key={tierIndex} className="grid grid-cols-3 gap-2 p-2 bg-white rounded">
+                                        <Input
+                                          type="number"
+                                          placeholder="Min professores"
+                                          value={tier.minTeachers}
+                                          onChange={(e) => {
+                                            const newPhases = [...editingPhases]
+                                            const originalLineIndex = newPhases[phaseIndex].pricingLines.findIndex(l => l.id === line.id)
+                                            if (newPhases[phaseIndex].pricingLines[originalLineIndex].tiers) {
+                                              newPhases[phaseIndex].pricingLines[originalLineIndex].tiers![tierIndex].minTeachers = parseInt(e.target.value) || 0
+                                            }
+                                            setEditingPhases(newPhases)
+                                          }}
+                                        />
+                                        <Input
+                                          type="number"
+                                          placeholder="Max (ou vazio)"
+                                          value={tier.maxTeachers || ''}
+                                          onChange={(e) => {
+                                            const newPhases = [...editingPhases]
+                                            const originalLineIndex = newPhases[phaseIndex].pricingLines.findIndex(l => l.id === line.id)
+                                            if (newPhases[phaseIndex].pricingLines[originalLineIndex].tiers) {
+                                              newPhases[phaseIndex].pricingLines[originalLineIndex].tiers![tierIndex].maxTeachers = e.target.value ? parseInt(e.target.value) : null
+                                            }
+                                            setEditingPhases(newPhases)
+                                          }}
+                                        />
+                                        <Input
+                                          type="number"
+                                          placeholder="Preço por professor"
+                                          value={tier.pricePerTeacher}
+                                          onChange={(e) => {
+                                            const newPhases = [...editingPhases]
+                                            const originalLineIndex = newPhases[phaseIndex].pricingLines.findIndex(l => l.id === line.id)
+                                            if (newPhases[phaseIndex].pricingLines[originalLineIndex].tiers) {
+                                              newPhases[phaseIndex].pricingLines[originalLineIndex].tiers![tierIndex].pricePerTeacher = parseInt(e.target.value) || 0
+                                            }
+                                            setEditingPhases(newPhases)
+                                          }}
+                                        />
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ))}
+                        </CardContent>
+                      </Card>
+
                       {/* Course Models Editor */}
                       <Card className="border-better-gray/20">
                         <CardHeader className="bg-gradient-to-r from-better-azure/10 to-better-green/5">
@@ -350,6 +420,9 @@ export default function PricingCalculator() {
                           // Update active models
                           setActiveCourseModels(editingModels)
                           setActivePhaseModels(editingPhases)
+                          
+                          // Force refresh of components
+                          setRefreshKey(prev => prev + 1)
                           
                           // Update the selected model if it was modified
                           const updatedSelectedModel = editingModels.find(model => model.id === selectedModel.id)
@@ -496,6 +569,7 @@ export default function PricingCalculator() {
 
             {/* Roadmap Selector */}
             <RoadmapSelector
+              key={`roadmap-${refreshKey}`}
               selectedPhases={selectedPhases}
               onPhaseToggle={handlePhaseToggle}
               onSelectAll={handleSelectAllPhases}
