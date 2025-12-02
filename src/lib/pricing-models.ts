@@ -20,6 +20,15 @@ export interface CourseModel {
   }[];
 }
 
+export interface PhasePricingLine {
+  id: string;
+  name: string;
+  type: 'per_student' | 'fixed' | 'manual';
+  pricePerStudent?: number;
+  fixedPrice?: number;
+  editable: boolean;
+}
+
 export interface PhaseModel {
   id: string;
   name: string;
@@ -28,13 +37,15 @@ export interface PhaseModel {
   pricePerStudent: number;
   description: string;
   timeline: string;
+  year: string;
+  pricingLines: PhasePricingLine[];
 }
 
 export const courseModels: CourseModel[] = [
   {
-    id: "santa-catarina-basic",
-    name: "Plano Básico SC",
-    description: "Implementação educacional básica para Santa Catarina",
+    id: "santa-catarina-essencial",
+    name: "Plano Essencial",
+    description: "Implementação educacional essencial para Santa Catarina",
     features: [
       "Formação inicial de professores",
       "Sistema de aprendizagem cognitiva",
@@ -50,8 +61,8 @@ export const courseModels: CourseModel[] = [
     ]
   },
   {
-    id: "santa-catarina-advanced",
-    name: "Plano Avançado SC",
+    id: "santa-catarina-completo",
+    name: "Plano Completo",
     description: "Implementação educacional completa com replicadores",
     features: [
       "Formação completa de replicadores",
@@ -69,8 +80,8 @@ export const courseModels: CourseModel[] = [
     ]
   },
   {
-    id: "santa-catarina-premium",
-    name: "Plano Premium SC",
+    id: "santa-catarina-transformacional",
+    name: "Plano Transformacional",
     description: "Implementação estadual completa com expansão",
     features: [
       "Rede completa de replicadores",
@@ -114,55 +125,178 @@ export const phaseModels: PhaseModel[] = [
     id: "fase0",
     name: "Fase 0",
     title: "Preparação",
-    basePrice: 50000,
-    pricePerStudent: 15,
+    basePrice: 0,
+    pricePerStudent: 0,
     description: "Estruturação inicial e preparação do programa",
-    timeline: "Fev 2026"
+    timeline: "Fev 2026",
+    year: "2026",
+    pricingLines: [
+      {
+        id: "async_platform",
+        name: "Assíncrono Plataforma",
+        type: "per_student",
+        pricePerStudent: 15,
+        editable: false
+      },
+      {
+        id: "ambassador_training",
+        name: "Treinamento de Embaixadores",
+        type: "per_student",
+        pricePerStudent: 25,
+        editable: false
+      },
+      {
+        id: "infrastructure",
+        name: "Infraestrutura",
+        type: "manual",
+        fixedPrice: 50000,
+        editable: true
+      }
+    ]
   },
   {
     id: "fase1",
     name: "Fase 1",
     title: "Formação",
-    basePrice: 75000,
-    pricePerStudent: 25,
+    basePrice: 0,
+    pricePerStudent: 0,
     description: "Sistema de aprendizagem e formação de replicadores",
-    timeline: "1º Sem 2026"
+    timeline: "1º Sem 2026",
+    year: "2026",
+    pricingLines: [
+      {
+        id: "async_platform",
+        name: "Assíncrono Plataforma",
+        type: "per_student",
+        pricePerStudent: 20,
+        editable: false
+      },
+      {
+        id: "ambassador_training",
+        name: "Treinamento de Embaixadores",
+        type: "per_student",
+        pricePerStudent: 30,
+        editable: false
+      },
+      {
+        id: "infrastructure",
+        name: "Infraestrutura",
+        type: "manual",
+        fixedPrice: 75000,
+        editable: true
+      }
+    ]
   },
   {
     id: "fase2",
     name: "Fase 2",
     title: "Escola-Piloto",
-    basePrice: 100000,
-    pricePerStudent: 35,
+    basePrice: 0,
+    pricePerStudent: 0,
     description: "Implementação da primeira escola piloto",
-    timeline: "2º Sem 2026"
+    timeline: "2º Sem 2026",
+    year: "2026",
+    pricingLines: [
+      {
+        id: "async_platform",
+        name: "Assíncrono Plataforma",
+        type: "per_student",
+        pricePerStudent: 25,
+        editable: false
+      },
+      {
+        id: "ambassador_training",
+        name: "Treinamento de Embaixadores",
+        type: "per_student",
+        pricePerStudent: 35,
+        editable: false
+      },
+      {
+        id: "infrastructure",
+        name: "Infraestrutura",
+        type: "manual",
+        fixedPrice: 100000,
+        editable: true
+      }
+    ]
   },
   {
     id: "fase3",
     name: "Fase 3",
     title: "Modelo Funcional",
-    basePrice: 125000,
-    pricePerStudent: 45,
+    basePrice: 0,
+    pricePerStudent: 0,
     description: "Desenvolvimento e validação do modelo funcional",
-    timeline: "1º Sem 2027"
+    timeline: "1º Sem 2027",
+    year: "2027-2030",
+    pricingLines: [
+      {
+        id: "training",
+        name: "Treinamento",
+        type: "per_student",
+        pricePerStudent: 40,
+        editable: false
+      },
+      {
+        id: "infrastructure",
+        name: "Infraestrutura",
+        type: "manual",
+        fixedPrice: 125000,
+        editable: true
+      }
+    ]
   },
   {
     id: "fase4",
     name: "Fase 4",
     title: "Modelo de Validação",
-    basePrice: 150000,
-    pricePerStudent: 55,
+    basePrice: 0,
+    pricePerStudent: 0,
     description: "Estabelecimento de protocolos e padrões",
-    timeline: "2º Sem 2027"
+    timeline: "2º Sem 2027",
+    year: "2027-2030",
+    pricingLines: [
+      {
+        id: "training",
+        name: "Treinamento",
+        type: "per_student",
+        pricePerStudent: 50,
+        editable: false
+      },
+      {
+        id: "infrastructure",
+        name: "Infraestrutura",
+        type: "manual",
+        fixedPrice: 150000,
+        editable: true
+      }
+    ]
   },
   {
     id: "fase5",
     name: "Fase 5",
     title: "Plano Executivo",
-    basePrice: 200000,
-    pricePerStudent: 65,
+    basePrice: 0,
+    pricePerStudent: 0,
     description: "Expansão estadual e implementação completa",
-    timeline: "2028-2030"
+    timeline: "2028-2030",
+    year: "2027-2030",
+    pricingLines: [
+      {
+        id: "training",
+        name: "Treinamento",
+        type: "per_student",
+        pricePerStudent: 65,
+        editable: false
+      },
+      {
+        id: "infrastructure",
+        name: "Infraestrutura",
+        type: "manual",
+        fixedPrice: 200000,
+        editable: true
+      }
+    ]
   }
 ];
 
@@ -222,7 +356,8 @@ export function calculatePrice(
 
 export function calculatePhasePrice(
   selectedPhases: string[],
-  studentCount: number
+  studentCount: number,
+  manualPricing: { [phaseId: string]: { [lineId: string]: number } } = {}
 ): {
   phasePrice: number;
   totalPhasePrice: number;
@@ -234,7 +369,20 @@ export function calculatePhasePrice(
   let totalPhasePrice = 0;
   
   selectedPhaseModels.forEach(phase => {
-    totalPhasePrice += phase.basePrice + (phase.pricePerStudent * studentCount);
+    let phaseTotal = 0;
+    
+    phase.pricingLines.forEach(line => {
+      if (line.type === 'per_student' && line.pricePerStudent) {
+        phaseTotal += line.pricePerStudent * studentCount;
+      } else if (line.type === 'fixed' && line.fixedPrice) {
+        phaseTotal += line.fixedPrice;
+      } else if (line.type === 'manual') {
+        const manualPrice = manualPricing[phase.id]?.[line.id] || line.fixedPrice || 0;
+        phaseTotal += manualPrice;
+      }
+    });
+    
+    totalPhasePrice += phaseTotal;
   });
   
   return {
@@ -249,7 +397,8 @@ export function calculateTotalPrice(
   modelId: string,
   studentCount: number,
   selectedPhases: string[],
-  extraFeatures: { [key: string]: number } = {}
+  extraFeatures: { [key: string]: number } = {},
+  manualPricing: { [phaseId: string]: { [lineId: string]: number } } = {}
 ): {
   coursePrice: ReturnType<typeof calculatePrice>;
   phasePrice: ReturnType<typeof calculatePhasePrice>;
@@ -261,7 +410,7 @@ export function calculateTotalPrice(
   };
 } {
   const coursePrice = calculatePrice(modelId, studentCount, extraFeatures);
-  const phasePrice = calculatePhasePrice(selectedPhases, studentCount);
+  const phasePrice = calculatePhasePrice(selectedPhases, studentCount, manualPricing);
   
   const finalTotalPrice = coursePrice.totalPrice + phasePrice.totalPhasePrice;
   

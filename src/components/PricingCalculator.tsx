@@ -45,6 +45,7 @@ export default function PricingCalculator() {
   const [editingModels, setEditingModels] = useState<CourseModel[]>(courseModels)
   const [activeCourseModels, setActiveCourseModels] = useState<CourseModel[]>(courseModels)
   const [selectedPhases, setSelectedPhases] = useState<string[]>(['fase0'])
+  const [manualPricing, setManualPricing] = useState<{ [phaseId: string]: { [lineId: string]: number } }>({})
 
   // Load custom models from localStorage on component mount
   useEffect(() => {
@@ -61,7 +62,7 @@ export default function PricingCalculator() {
     }
   }, [])
 
-  const pricing = calculateTotalPrice(selectedModel.id, studentCount, selectedPhases, extraFeatures)
+  const pricing = calculateTotalPrice(selectedModel.id, studentCount, selectedPhases, extraFeatures, manualPricing)
 
   const handleStudentCountChange = (value: string) => {
     const count = parseInt(value) || 0
@@ -93,6 +94,16 @@ export default function PricingCalculator() {
     setSelectedPhases([])
   }
 
+  const handleUpdateManualPricing = (phaseId: string, lineId: string, value: number) => {
+    setManualPricing(prev => ({
+      ...prev,
+      [phaseId]: {
+        ...prev[phaseId],
+        [lineId]: value
+      }
+    }))
+  }
+
   const generateProposal = () => {
     const proposalData = {
       clientName: proposalInfo.clientName,
@@ -107,7 +118,8 @@ export default function PricingCalculator() {
       pricing,
       extraFeatures,
       selectedPhases,
-      phaseModels: pricing.phasePrice.selectedPhaseModels
+      phaseModels: pricing.phasePrice.selectedPhaseModels,
+      manualPricing
     };
 
     generateProposalPDF(proposalData);
@@ -525,14 +537,14 @@ export default function PricingCalculator() {
                   <Slider
                     value={[studentCount]}
                     onValueChange={(value) => setStudentCount(value[0])}
-                    max={2000}
+                    max={50000}
                     min={1}
                     step={1}
                     className="w-full"
                   />
                   <div className="flex justify-between text-xs text-gray-500">
                     <span>1</span>
-                    <span>2.000</span>
+                    <span>50.000</span>
                   </div>
                 </div>
               </CardContent>
@@ -544,6 +556,9 @@ export default function PricingCalculator() {
               onPhaseToggle={handlePhaseToggle}
               onSelectAll={handleSelectAllPhases}
               onClearAll={handleClearAllPhases}
+              studentCount={studentCount}
+              manualPricing={manualPricing}
+              onUpdateManualPricing={handleUpdateManualPricing}
             />
 
             {/* Extra Features */}

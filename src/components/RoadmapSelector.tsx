@@ -1,109 +1,33 @@
 "use client"
 
-import React from 'react'
+import React, { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { CheckCircle, Circle, Calendar, MapPin } from 'lucide-react'
+import { CheckCircle, Circle, Calendar, MapPin, Info } from 'lucide-react'
+import PhaseDetailModal from '@/components/PhaseDetailModal'
+import { phaseModels, PhaseModel } from '@/lib/pricing-models'
 
-export interface RoadmapPhase {
-  id: string
-  name: string
-  title: string
-  description: string
-  timeline: string
-  deliverables: string[]
-  infrastructure?: boolean
-}
-
-export const roadmapPhases: RoadmapPhase[] = [
-  {
-    id: 'fase0',
-    name: 'Fase 0',
-    title: 'Preparação',
-    description: 'Estruturação inicial do programa e formação base',
-    timeline: 'Fev 2026',
-    deliverables: [
-      'Curso de IA para Professores',
-      'Programa de Formação de Replicadores',
-      'Planejamento & Estratégia (Pedagógico, Operacional, Técnico)'
-    ],
-    infrastructure: true
-  },
-  {
-    id: 'fase1',
-    name: 'Fase 1',
-    title: 'Formação',
-    description: 'Sistema de aprendizagem e primeira turma',
-    timeline: '1º Sem 2026',
-    deliverables: [
-      'Sistema de Aprendizagem Cognitiva',
-      '1ª Turma de Replicadores',
-      'Criação do Projeto Escola-Piloto (Capacitação, Infraestrutura, Material Pedagógico)'
-    ]
-  },
-  {
-    id: 'fase2',
-    name: 'Fase 2',
-    title: 'Escola-Piloto',
-    description: 'Implementação da primeira escola piloto',
-    timeline: '2º Sem 2026',
-    deliverables: [
-      'Formação dos Professores pelos Replicadores',
-      'Construção de Conteúdo Pedagógico (BNCC)',
-      'Implementação de Infraestrutura Tecnológica para Escola-Piloto'
-    ]
-  },
-  {
-    id: 'fase3',
-    name: 'Fase 3',
-    title: 'Modelo Funcional',
-    description: 'Desenvolvimento do modelo funcional e validação',
-    timeline: '1º Sem 2027',
-    deliverables: [
-      'Acompanhamento de Professores e Protocolo de Treino',
-      'Validação dos Pedagógica dos Resultados em Aula',
-      'Construção e Implementação de Indicadores de Desempenho'
-    ]
-  },
-  {
-    id: 'fase4',
-    name: 'Fase 4',
-    title: 'Modelo de Validação',
-    description: 'Estabelecimento de protocolos e padrões',
-    timeline: '2º Sem 2027',
-    deliverables: [
-      'Definição da Base dos Protocolos de Treinamento Técnico',
-      'Modelo de Validação Cognitiva de Conteúdo Didático',
-      'Desenvolvimento do protocolo padrão de implementação técnico-operacional'
-    ]
-  },
-  {
-    id: 'fase5',
-    name: 'Fase 5',
-    title: 'Plano Executivo',
-    description: 'Expansão e implementação estadual',
-    timeline: '2028-2030',
-    deliverables: [
-      'Construção da Rede de Professores Replicadores',
-      'Expansão Estadual da Estrutura de Escolas Habilitadas',
-      'Plano Estratégico (Humano, Operacional, Técnico)'
-    ]
-  }
-]
 
 interface RoadmapSelectorProps {
   selectedPhases: string[]
   onPhaseToggle: (phaseId: string) => void
   onSelectAll: () => void
   onClearAll: () => void
+  studentCount: number
+  manualPricing: { [phaseId: string]: { [lineId: string]: number } }
+  onUpdateManualPricing: (phaseId: string, lineId: string, value: number) => void
 }
 
 export default function RoadmapSelector({ 
   selectedPhases, 
   onPhaseToggle, 
   onSelectAll, 
-  onClearAll 
+  onClearAll,
+  studentCount,
+  manualPricing,
+  onUpdateManualPricing
 }: RoadmapSelectorProps) {
+  const [selectedPhaseForModal, setSelectedPhaseForModal] = useState<PhaseModel | null>(null)
   const isPhaseSelected = (phaseId: string) => selectedPhases.includes(phaseId)
   
   return (
@@ -138,7 +62,7 @@ export default function RoadmapSelector({
         {/* Timeline Visual */}
         <div className="relative mb-8">
           <div className="flex items-center justify-between mb-4">
-            {roadmapPhases.map((phase, index) => (
+            {phaseModels.map((phase, index) => (
               <div key={phase.id} className="flex flex-col items-center relative z-10">
                 <button
                   onClick={() => onPhaseToggle(phase.id)}
@@ -176,7 +100,7 @@ export default function RoadmapSelector({
 
         {/* Phase Details */}
         <div className="space-y-4">
-          {roadmapPhases.map((phase) => (
+          {phaseModels.map((phase) => (
             <div
               key={phase.id}
               className={`p-4 rounded-lg border transition-all duration-200 cursor-pointer ${
@@ -201,23 +125,27 @@ export default function RoadmapSelector({
                   
                   <p className="text-sm text-better-gray mb-3">{phase.description}</p>
                   
-                  <div className="space-y-1">
-                    <div className="text-xs font-medium text-better-black">Entregas:</div>
-                    {phase.deliverables.map((deliverable, idx) => (
-                      <div key={idx} className="text-xs text-better-gray flex items-start">
-                        <span className="text-better-green mr-2 mt-0.5">•</span>
-                        {deliverable}
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <div className="text-xs font-medium text-better-black">
+                        Estrutura de Preços: {phase.pricingLines.length} componentes
                       </div>
-                    ))}
-                  </div>
-                  
-                  {phase.infrastructure && (
-                    <div className="mt-2">
-                      <Badge variant="secondary" className="text-xs bg-better-azure/20 text-better-black">
-                        Infraestrutura Alocada
-                      </Badge>
+                      <div className="text-xs text-better-gray">
+                        Ano: {phase.year}
+                      </div>
                     </div>
-                  )}
+                    
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setSelectedPhaseForModal(phase)
+                      }}
+                      className="flex items-center gap-1 px-3 py-1 bg-better-azure/10 text-better-azure rounded-full hover:bg-better-azure/20 transition-colors text-xs font-medium"
+                    >
+                      <Info className="w-3 h-3" />
+                      Ver Preços
+                    </button>
+                  </div>
                 </div>
                 
                 <div className="ml-4">
@@ -231,6 +159,20 @@ export default function RoadmapSelector({
             </div>
           ))}
         </div>
+
+        {/* Phase Detail Modal */}
+        <PhaseDetailModal
+          phase={selectedPhaseForModal}
+          isOpen={!!selectedPhaseForModal}
+          onClose={() => setSelectedPhaseForModal(null)}
+          studentCount={studentCount}
+          manualPricing={manualPricing[selectedPhaseForModal?.id || ''] || {}}
+          onUpdateManualPricing={(lineId, value) => {
+            if (selectedPhaseForModal) {
+              onUpdateManualPricing(selectedPhaseForModal.id, lineId, value)
+            }
+          }}
+        />
       </CardContent>
     </Card>
   )
