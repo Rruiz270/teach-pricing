@@ -9,9 +9,10 @@ import { Slider } from '@/components/ui/slider'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
-import { courseModels, calculatePrice, type CourseModel } from '@/lib/pricing-models'
+import { courseModels, calculateTotalPrice, phaseModels, type CourseModel } from '@/lib/pricing-models'
 import { formatCurrency, formatNumber } from '@/lib/utils'
 import { generateProposalPDF } from '@/lib/pdf-generator'
+import RoadmapSelector from '@/components/RoadmapSelector'
 import { Calculator, Download, Users, BookOpen, Award, Clock, ChevronDown, ChevronUp, FileText, Settings, Shield } from 'lucide-react'
 
 interface ProposalInfo {
@@ -43,6 +44,7 @@ export default function PricingCalculator() {
   const [isAdmin, setIsAdmin] = useState(true) // TODO: Replace with real auth logic
   const [editingModels, setEditingModels] = useState<CourseModel[]>(courseModels)
   const [activeCourseModels, setActiveCourseModels] = useState<CourseModel[]>(courseModels)
+  const [selectedPhases, setSelectedPhases] = useState<string[]>(['fase0'])
 
   // Load custom models from localStorage on component mount
   useEffect(() => {
@@ -59,7 +61,7 @@ export default function PricingCalculator() {
     }
   }, [])
 
-  const pricing = calculatePrice(selectedModel.id, studentCount, extraFeatures)
+  const pricing = calculateTotalPrice(selectedModel.id, studentCount, selectedPhases, extraFeatures)
 
   const handleStudentCountChange = (value: string) => {
     const count = parseInt(value) || 0
@@ -71,6 +73,24 @@ export default function PricingCalculator() {
       ...prev,
       [featureId]: Math.max(0, value)
     }))
+  }
+
+  const handlePhaseToggle = (phaseId: string) => {
+    setSelectedPhases(prev => {
+      if (prev.includes(phaseId)) {
+        return prev.filter(id => id !== phaseId)
+      } else {
+        return [...prev, phaseId].sort()
+      }
+    })
+  }
+
+  const handleSelectAllPhases = () => {
+    setSelectedPhases(phaseModels.map(phase => phase.id))
+  }
+
+  const handleClearAllPhases = () => {
+    setSelectedPhases([])
   }
 
   const generateProposal = () => {
@@ -85,7 +105,9 @@ export default function PricingCalculator() {
       selectedModel,
       studentCount,
       pricing,
-      extraFeatures
+      extraFeatures,
+      selectedPhases,
+      phaseModels: pricing.phasePrice.selectedPhaseModels
     };
 
     generateProposalPDF(proposalData);
@@ -399,10 +421,10 @@ export default function PricingCalculator() {
                 <span className="text-2xl font-bold text-better-azure">BETTER TECH</span>
               </div>
               <h1 className="text-4xl font-bold mb-3">
-                TEACH Platform - Calculadora de Preços
+                Plano Educacional Santa Catarina
               </h1>
               <p className="text-lg text-better-white/80 mb-4">
-                Configure sua proposta comercial para cursos de IA para educadores
+                Configure sua proposta para implementação educacional em Santa Catarina
               </p>
               <div className="inline-flex items-center px-4 py-2 bg-better-azure/20 rounded-full text-better-azure text-sm font-medium">
                 <BookOpen className="w-4 h-4 mr-2" />
@@ -419,10 +441,10 @@ export default function PricingCalculator() {
               <CardHeader className="bg-gradient-to-r from-better-azure/10 to-better-green/5 rounded-t-lg">
                 <CardTitle className="flex items-center gap-2 text-better-black">
                   <BookOpen className="w-5 h-5 text-better-azure" />
-                  Modalidades de Curso
+                  Planos de Implementação
                 </CardTitle>
                 <CardDescription className="text-better-gray">
-                  Selecione o modelo de curso que melhor atende às necessidades do cliente
+                  Selecione o plano que melhor atende às necessidades de Santa Catarina
                 </CardDescription>
               </CardHeader>
               <CardContent className="grid md:grid-cols-3 gap-4">
@@ -516,6 +538,14 @@ export default function PricingCalculator() {
               </CardContent>
             </Card>
 
+            {/* Roadmap Selector */}
+            <RoadmapSelector
+              selectedPhases={selectedPhases}
+              onPhaseToggle={handlePhaseToggle}
+              onSelectAll={handleSelectAllPhases}
+              onClearAll={handleClearAllPhases}
+            />
+
             {/* Extra Features */}
             {selectedModel.extraFeatures && (
               <Card>
@@ -568,40 +598,50 @@ export default function PricingCalculator() {
                   <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-better-azure to-better-green"></div>
                   <div className="text-center relative z-10">
                     <div className="text-3xl font-bold text-better-azure mb-2">
-                      {formatCurrency(pricing.totalPrice)}
+                      {formatCurrency(pricing.finalTotalPrice)}
                     </div>
                     <div className="text-sm text-better-white/80">
-                      Investimento mensal total
+                      Investimento total do projeto
                     </div>
                   </div>
                 </div>
 
-                <div className="space-y-2 text-sm">
+                <div className="space-y-3 text-sm">
                   <div className="flex justify-between">
                     <span>Professores:</span>
                     <span className="font-medium">{formatNumber(studentCount)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Valor base:</span>
-                    <span>{formatCurrency(pricing.basePrice)}</span>
+                    <span>Fases selecionadas:</span>
+                    <span className="font-medium">{selectedPhases.length}</span>
                   </div>
-                  {pricing.extraPrice > 0 && (
+                  
+                  <div className="border-t pt-2 space-y-2">
                     <div className="flex justify-between">
-                      <span>Recursos extras:</span>
-                      <span>{formatCurrency(pricing.extraPrice)}</span>
+                      <span>Plano base:</span>
+                      <span>{formatCurrency(pricing.coursePrice.totalPrice)}</span>
                     </div>
-                  )}
-                  <div className="border-t pt-2 flex justify-between font-medium">
-                    <span>Valor por professor:</span>
-                    <span>{formatCurrency(pricing.pricePerStudent)}</span>
+                    <div className="flex justify-between">
+                      <span>Fases do roadmap:</span>
+                      <span>{formatCurrency(pricing.phasePrice.totalPhasePrice)}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="border-t pt-2 flex justify-between font-bold text-better-azure">
+                    <span>Total:</span>
+                    <span>{formatCurrency(pricing.finalTotalPrice)}</span>
+                  </div>
+                  <div className="flex justify-between text-xs text-gray-600">
+                    <span>Valor médio por professor:</span>
+                    <span>{formatCurrency(pricing.finalTotalPrice / studentCount)}</span>
                   </div>
                 </div>
 
-                {pricing.tier && (
+                {pricing.coursePrice.tier && (
                   <div className="text-xs text-gray-500 bg-blue-50 p-2 rounded">
-                    <strong>Faixa atual:</strong> {pricing.tier.minStudents} a {pricing.tier.maxStudents || '+'} professores
+                    <strong>Faixa atual:</strong> {pricing.coursePrice.tier.minStudents} a {pricing.coursePrice.tier.maxStudents || '+'} professores
                     <br />
-                    <strong>Preço base:</strong> {formatCurrency(pricing.tier.pricePerStudent)}/professor
+                    <strong>Preço base do plano:</strong> {formatCurrency(pricing.coursePrice.tier.pricePerStudent)}/professor
                   </div>
                 )}
               </CardContent>
@@ -612,7 +652,7 @@ export default function PricingCalculator() {
               <CardHeader>
                 <CardTitle>Gerar Proposta PDF</CardTitle>
                 <CardDescription>
-                  Preencha os dados para gerar uma proposta comercial profissional em PDF
+                  Preencha os dados para gerar uma proposta do Plano Educacional Santa Catarina
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">

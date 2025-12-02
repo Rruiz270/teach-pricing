@@ -20,82 +20,149 @@ export interface CourseModel {
   }[];
 }
 
+export interface PhaseModel {
+  id: string;
+  name: string;
+  title: string;
+  basePrice: number;
+  pricePerStudent: number;
+  description: string;
+  timeline: string;
+}
+
 export const courseModels: CourseModel[] = [
   {
-    id: "async-digital",
-    name: "TEACH Digital",
-    description: "Aprendizado assíncrono com flexibilidade total",
+    id: "santa-catarina-basic",
+    name: "Plano Básico SC",
+    description: "Implementação educacional básica para Santa Catarina",
     features: [
-      "Acesso ilimitado à plataforma",
-      "2 workshops mensais",
-      "Aula introdutória presencial",
-      "Suporte via chat",
-      "Certificado de conclusão"
+      "Formação inicial de professores",
+      "Sistema de aprendizagem cognitiva",
+      "Acompanhamento pedagógico",
+      "Suporte técnico básico",
+      "Relatórios de progresso"
     ],
     tiers: [
-      { minStudents: 1, maxStudents: 200, pricePerStudent: 120 },
-      { minStudents: 201, maxStudents: 500, pricePerStudent: 105 },
-      { minStudents: 501, maxStudents: 1000, pricePerStudent: 95 },
-      { minStudents: 1001, maxStudents: null, pricePerStudent: 89 }
+      { minStudents: 1, maxStudents: 200, pricePerStudent: 150 },
+      { minStudents: 201, maxStudents: 500, pricePerStudent: 135 },
+      { minStudents: 501, maxStudents: 1000, pricePerStudent: 125 },
+      { minStudents: 1001, maxStudents: null, pricePerStudent: 115 }
     ]
   },
   {
-    id: "group-online",
-    name: "TEACH Interativo",
-    description: "Aulas em grupo online com interação em tempo real",
+    id: "santa-catarina-advanced",
+    name: "Plano Avançado SC",
+    description: "Implementação educacional completa com replicadores",
     features: [
-      "Aulas online 2x/semana (90min cada)",
-      "Grupos de até 30 estudantes",
-      "Acesso às aulas assíncronas",
-      "2 workshops mensais",
-      "Aula introdutória presencial",
-      "Suporte prioritário",
-      "Certificado de conclusão"
+      "Formação completa de replicadores",
+      "Sistema cognitivo avançado",
+      "Escola-piloto dedicada",
+      "Acompanhamento intensivo",
+      "Protocolo de validação",
+      "Infraestrutura tecnológica",
+      "Suporte especializado 24/7"
     ],
     tiers: [
-      { minStudents: 1, maxStudents: 200, pricePerStudent: 200 },
-      { minStudents: 201, maxStudents: 500, pricePerStudent: 179 },
-      { minStudents: 501, maxStudents: null, pricePerStudent: 159 }
+      { minStudents: 1, maxStudents: 200, pricePerStudent: 280 },
+      { minStudents: 201, maxStudents: 500, pricePerStudent: 250 },
+      { minStudents: 501, maxStudents: null, pricePerStudent: 220 }
     ]
   },
   {
-    id: "personalized",
-    name: "TEACH Premium",
-    description: "Ensino personalizado com grupos reduzidos",
+    id: "santa-catarina-premium",
+    name: "Plano Premium SC",
+    description: "Implementação estadual completa com expansão",
     features: [
-      "Grupos de até 10 estudantes",
-      "Acesso completo à plataforma",
-      "Aulas personalizadas",
-      "Workshops ilimitados",
-      "Múltiplos encontros presenciais",
-      "Suporte 1:1",
-      "Certificado premium"
+      "Rede completa de replicadores",
+      "Múltiplas escolas-piloto",
+      "Validação pedagógica completa",
+      "Expansão estadual planejada",
+      "Protocolos técnico-operacionais",
+      "Indicadores de desempenho avançados",
+      "Suporte executivo dedicado"
     ],
     tiers: [
-      { minStudents: 1, maxStudents: 50, pricePerStudent: 350 },
-      { minStudents: 51, maxStudents: 100, pricePerStudent: 320 },
-      { minStudents: 101, maxStudents: null, pricePerStudent: 300 }
+      { minStudents: 1, maxStudents: 50, pricePerStudent: 450 },
+      { minStudents: 51, maxStudents: 100, pricePerStudent: 420 },
+      { minStudents: 101, maxStudents: null, pricePerStudent: 390 }
     ],
     extraFeatures: [
       {
-        id: "extra-hours",
-        name: "Horas Extras por Semana",
-        description: "Adicione mais horas de aula personalizadas",
+        id: "extra-schools",
+        name: "Escolas-Piloto Extras",
+        description: "Adicione mais escolas ao programa piloto",
+        pricePerStudent: 35
+      },
+      {
+        id: "extra-training",
+        name: "Treinamento Especializado",
+        description: "Módulos de treinamento especializados adicionais",
         pricePerStudent: 25
       },
       {
-        id: "extra-workshops",
-        name: "Workshops Adicionais",
-        description: "Workshops especializados extras por mês",
-        pricePerStudent: 15
-      },
-      {
-        id: "in-person-extra",
-        name: "Encontros Presenciais Extras",
-        description: "Adicione mais encontros presenciais",
-        pricePerStudent: 45
+        id: "infrastructure-upgrade",
+        name: "Upgrade de Infraestrutura",
+        description: "Melhorias tecnológicas avançadas",
+        pricePerStudent: 55
       }
     ]
+  }
+];
+
+export const phaseModels: PhaseModel[] = [
+  {
+    id: "fase0",
+    name: "Fase 0",
+    title: "Preparação",
+    basePrice: 50000,
+    pricePerStudent: 15,
+    description: "Estruturação inicial e preparação do programa",
+    timeline: "Fev 2026"
+  },
+  {
+    id: "fase1",
+    name: "Fase 1",
+    title: "Formação",
+    basePrice: 75000,
+    pricePerStudent: 25,
+    description: "Sistema de aprendizagem e formação de replicadores",
+    timeline: "1º Sem 2026"
+  },
+  {
+    id: "fase2",
+    name: "Fase 2",
+    title: "Escola-Piloto",
+    basePrice: 100000,
+    pricePerStudent: 35,
+    description: "Implementação da primeira escola piloto",
+    timeline: "2º Sem 2026"
+  },
+  {
+    id: "fase3",
+    name: "Fase 3",
+    title: "Modelo Funcional",
+    basePrice: 125000,
+    pricePerStudent: 45,
+    description: "Desenvolvimento e validação do modelo funcional",
+    timeline: "1º Sem 2027"
+  },
+  {
+    id: "fase4",
+    name: "Fase 4",
+    title: "Modelo de Validação",
+    basePrice: 150000,
+    pricePerStudent: 55,
+    description: "Estabelecimento de protocolos e padrões",
+    timeline: "2º Sem 2027"
+  },
+  {
+    id: "fase5",
+    name: "Fase 5",
+    title: "Plano Executivo",
+    basePrice: 200000,
+    pricePerStudent: 65,
+    description: "Expansão estadual e implementação completa",
+    timeline: "2028-2030"
   }
 ];
 
@@ -150,5 +217,62 @@ export function calculatePrice(
     totalPrice,
     pricePerStudent: totalPrice / studentCount,
     tier
+  };
+}
+
+export function calculatePhasePrice(
+  selectedPhases: string[],
+  studentCount: number
+): {
+  phasePrice: number;
+  totalPhasePrice: number;
+  pricePerStudentPhase: number;
+  selectedPhaseModels: PhaseModel[];
+} {
+  const selectedPhaseModels = phaseModels.filter(phase => selectedPhases.includes(phase.id));
+  
+  let totalPhasePrice = 0;
+  
+  selectedPhaseModels.forEach(phase => {
+    totalPhasePrice += phase.basePrice + (phase.pricePerStudent * studentCount);
+  });
+  
+  return {
+    phasePrice: totalPhasePrice,
+    totalPhasePrice,
+    pricePerStudentPhase: studentCount > 0 ? totalPhasePrice / studentCount : 0,
+    selectedPhaseModels
+  };
+}
+
+export function calculateTotalPrice(
+  modelId: string,
+  studentCount: number,
+  selectedPhases: string[],
+  extraFeatures: { [key: string]: number } = {}
+): {
+  coursePrice: ReturnType<typeof calculatePrice>;
+  phasePrice: ReturnType<typeof calculatePhasePrice>;
+  finalTotalPrice: number;
+  breakdown: {
+    courseTotal: number;
+    phaseTotal: number;
+    extraTotal: number;
+  };
+} {
+  const coursePrice = calculatePrice(modelId, studentCount, extraFeatures);
+  const phasePrice = calculatePhasePrice(selectedPhases, studentCount);
+  
+  const finalTotalPrice = coursePrice.totalPrice + phasePrice.totalPhasePrice;
+  
+  return {
+    coursePrice,
+    phasePrice,
+    finalTotalPrice,
+    breakdown: {
+      courseTotal: coursePrice.basePrice,
+      phaseTotal: phasePrice.totalPhasePrice,
+      extraTotal: coursePrice.extraPrice
+    }
   };
 }

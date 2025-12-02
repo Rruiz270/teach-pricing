@@ -1,6 +1,6 @@
 import jsPDF from 'jspdf';
 import { formatCurrency, formatNumber } from './utils';
-import { CourseModel, PricingTier } from './pricing-models';
+import { CourseModel, PricingTier, PhaseModel } from './pricing-models';
 
 interface ProposalData {
   clientName: string;
@@ -13,13 +13,29 @@ interface ProposalData {
   selectedModel: CourseModel;
   studentCount: number;
   pricing: {
-    basePrice: number;
-    extraPrice: number;
-    totalPrice: number;
-    pricePerStudent: number;
-    tier: PricingTier | null;
+    coursePrice: {
+      basePrice: number;
+      extraPrice: number;
+      totalPrice: number;
+      pricePerStudent: number;
+      tier: PricingTier | null;
+    };
+    phasePrice: {
+      phasePrice: number;
+      totalPhasePrice: number;
+      pricePerStudentPhase: number;
+      selectedPhaseModels: PhaseModel[];
+    };
+    finalTotalPrice: number;
+    breakdown: {
+      courseTotal: number;
+      phaseTotal: number;
+      extraTotal: number;
+    };
   };
   extraFeatures: { [key: string]: number };
+  selectedPhases: string[];
+  phaseModels: PhaseModel[];
 }
 
 export function generateProposalPDF(data: ProposalData) {
@@ -82,7 +98,7 @@ export function generateProposalPDF(data: ProposalData) {
   pdf.setTextColor(255, 255, 252);
   pdf.setFontSize(10);
   pdf.setFont('helvetica', 'bold');
-  pdf.text('TEACH Platform - Proposta Comercial', pageWidth - 10, 12, { align: 'right' });
+  pdf.text('Plano Educacional Santa Catarina', pageWidth - 10, 12, { align: 'right' });
   
   // Date in smaller text
   pdf.setFontSize(8);
@@ -95,7 +111,7 @@ export function generateProposalPDF(data: ProposalData) {
   // Title
   pdf.setFontSize(18);
   pdf.setFont('helvetica', 'bold');
-  yPosition = addText('PROPOSTA COMERCIAL - TEACH PLATFORM', 20, yPosition);
+  yPosition = addText('PROPOSTA COMERCIAL - PLANO EDUCACIONAL SANTA CATARINA', 20, yPosition);
   yPosition += 5;
 
   // Client Information Section with styled background
@@ -222,8 +238,9 @@ export function generateProposalPDF(data: ProposalData) {
   // Financial details in organized layout
   const financialData = [
     [`Número de Professores:`, formatNumber(data.studentCount)],
-    [`Faixa de Preço:`, `${data.pricing.tier?.minStudents} a ${data.pricing.tier?.maxStudents || '+'} professores`],
-    [`Valor por Professor:`, formatCurrency(data.pricing.tier?.pricePerStudent || 0)]
+    [`Fases Selecionadas:`, `${data.selectedPhases.length} de 6 fases`],
+    [`Faixa de Preço:`, `${data.pricing.coursePrice.tier?.minStudents} a ${data.pricing.coursePrice.tier?.maxStudents || '+'} professores`],
+    [`Valor por Professor (Plano):`, formatCurrency(data.pricing.coursePrice.tier?.pricePerStudent || 0)]
   ];
   
   pdf.setFontSize(11);
@@ -242,16 +259,36 @@ export function generateProposalPDF(data: ProposalData) {
   pdf.setFontSize(12);
   pdf.setFont('helvetica', 'bold');
   pdf.setTextColor(164, 223, 0); // Better Tech Green for subheaders
-  yPosition = addText('Investimento Base', 30, yPosition);
+  yPosition = addText('Plano Base', 30, yPosition);
   yPosition += 4;
 
   pdf.setFontSize(11);
   pdf.setFont('helvetica', 'normal');
   pdf.setTextColor(117, 119, 128); // Better Tech Grey
-  yPosition = addText(`Valor Mensal Base: ${formatCurrency(data.pricing.basePrice)}`, 30, yPosition);
+  yPosition = addText(`Valor do Plano: ${formatCurrency(data.pricing.coursePrice.totalPrice)}`, 30, yPosition);
+
+  yPosition += 8;
+  pdf.setFontSize(12);
+  pdf.setFont('helvetica', 'bold');
+  pdf.setTextColor(164, 223, 0); // Better Tech Green
+  yPosition = addText('Roadmap de Implementação', 30, yPosition);
+  yPosition += 4;
+
+  pdf.setFontSize(11);
+  pdf.setFont('helvetica', 'normal');
+  pdf.setTextColor(117, 119, 128); // Better Tech Grey
+  data.phaseModels.forEach((phase) => {
+    const phaseTotal = phase.basePrice + (phase.pricePerStudent * data.studentCount);
+    yPosition = addText(`• ${phase.name} - ${phase.title}: ${formatCurrency(phaseTotal)}`, 35, yPosition);
+    yPosition += 3;
+  });
+
+  yPosition += 5;
+  pdf.setFont('helvetica', 'bold');
+  yPosition = addText(`Total Fases: ${formatCurrency(data.pricing.phasePrice.totalPhasePrice)}`, 30, yPosition);
 
   // Extra features if any
-  if (data.pricing.extraPrice > 0) {
+  if (data.pricing.coursePrice.extraPrice > 0) {
     yPosition += 8;
     pdf.setFontSize(12);
     pdf.setFont('helvetica', 'bold');
@@ -277,7 +314,7 @@ export function generateProposalPDF(data: ProposalData) {
 
     yPosition += 3;
     pdf.setFont('helvetica', 'bold');
-    yPosition = addText(`Total Recursos Extras: ${formatCurrency(data.pricing.extraPrice)}`, 30, yPosition);
+    yPosition = addText(`Total Recursos Extras: ${formatCurrency(data.pricing.coursePrice.extraPrice)}`, 30, yPosition);
   }
 
   yPosition += 15;
@@ -297,16 +334,16 @@ export function generateProposalPDF(data: ProposalData) {
   pdf.setFont('helvetica', 'bold');
   
   // Center the title
-  const titleWidth = pdf.getTextWidth('INVESTIMENTO TOTAL MENSAL');
+  const titleWidth = pdf.getTextWidth('INVESTIMENTO TOTAL DO PROJETO');
   const titleX = (pageWidth - titleWidth) / 2;
-  pdf.text('INVESTIMENTO TOTAL MENSAL', titleX, yPosition + 10);
+  pdf.text('INVESTIMENTO TOTAL DO PROJETO', titleX, yPosition + 10);
   yPosition += 18;
   
   // Large price display - centered
   pdf.setFontSize(24);
   pdf.setTextColor(164, 223, 0); // Better Tech Green for price
   pdf.setFont('helvetica', 'bold');
-  const priceText = formatCurrency(data.pricing.totalPrice);
+  const priceText = formatCurrency(data.pricing.finalTotalPrice);
   const priceWidth = pdf.getTextWidth(priceText);
   const priceX = (pageWidth - priceWidth) / 2;
   pdf.text(priceText, priceX, yPosition);
@@ -316,7 +353,8 @@ export function generateProposalPDF(data: ProposalData) {
   pdf.setTextColor(255, 255, 252); // Better Tech White
   pdf.setFontSize(11);
   pdf.setFont('helvetica', 'italic');
-  const subText = `Valor por professor/mês: ${formatCurrency(data.pricing.pricePerStudent)}`;
+  const avgPerTeacher = data.pricing.finalTotalPrice / data.studentCount;
+  const subText = `Valor médio por professor: ${formatCurrency(avgPerTeacher)}`;
   const subWidth = pdf.getTextWidth(subText);
   const subX = (pageWidth - subWidth) / 2;
   pdf.text(subText, subX, yPosition);
@@ -347,7 +385,7 @@ export function generateProposalPDF(data: ProposalData) {
     pdf.text('TECH', 65, 13); // Smaller and higher
     pdf.setTextColor(255, 255, 252); // White
     pdf.setFontSize(9);
-    pdf.text('TEACH Platform - Proposta Comercial', pageWidth - 10, 16, { align: 'right' });
+    pdf.text('Plano Educacional Santa Catarina', pageWidth - 10, 16, { align: 'right' });
     
     pdf.setTextColor(117, 119, 128); // Reset to Better Tech Grey for content
   } else {
@@ -404,7 +442,7 @@ export function generateProposalPDF(data: ProposalData) {
   pdf.setFontSize(11);
   pdf.setFont('helvetica', 'normal');
   const aboutLines = pdf.splitTextToSize(
-    'A Better Tech é especializada em soluções educacionais inovadoras, focada em capacitar educadores com as mais modernas tecnologias de IA. Nossa plataforma TEACH representa o futuro da educação brasileira.',
+    'A Better Tech é especializada em soluções educacionais inovadoras, focada em capacitar educadores com as mais modernas tecnologias de IA. O Plano Educacional Santa Catarina representa o futuro da educação catarinense, integrando IA de forma estruturada e pedagógica.',
     pageWidth - 70
   );
   pdf.text(aboutLines, 30, yPosition);
@@ -488,6 +526,6 @@ export function generateProposalPDF(data: ProposalData) {
   pdf.text(tagline, (pageWidth - taglineWidth) / 2, yPosition + 6);
 
   // Save the PDF
-  const fileName = `proposta-teach-${data.schoolName || 'cliente'}-${new Date().toISOString().split('T')[0]}.pdf`;
+  const fileName = `proposta-santa-catarina-${data.schoolName || 'cliente'}-${new Date().toISOString().split('T')[0]}.pdf`;
   pdf.save(fileName);
 }

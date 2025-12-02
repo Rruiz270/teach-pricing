@@ -65,3 +65,64 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  /* Better Tech Colors as utility classes */
+  .better-azure {
+    color: hsl(var(--better-pale-azure));
+  }
+  .better-black {
+    color: hsl(var(--better-rich-black));
+  }
+  .better-gray {
+    color: hsl(var(--better-gray));
+  }
+  .better-white {
+    color: hsl(var(--better-baby-powder));
+  }
+  .better-green {
+    color: hsl(var(--better-yellow-green));
+  }
+  
+  .bg-better-azure {
+    background-color: hsl(var(--better-pale-azure));
+  }
+  .bg-better-black {
+    background-color: hsl(var(--better-rich-black));
+  }
+  .bg-better-gray {
+    background-color: hsl(var(--better-gray));
+  }
+  .bg-better-white {
+    background-color: hsl(var(--better-baby-powder));
+  }
+  .bg-better-green {
+    background-color: hsl(var(--better-yellow-green));
+  }
+  
+  .border-better-azure {
+    border-color: hsl(var(--better-pale-azure));
+  }
+  .border-better-gray {
+    border-color: hsl(var(--better-gray));
+  }
+  .border-better-green {
+    border-color: hsl(var(--better-yellow-green));
+  }
+  
+  .text-better-azure {
+    color: hsl(var(--better-pale-azure));
+  }
+  .text-better-black {
+    color: hsl(var(--better-rich-black));
+  }
+  .text-better-gray {
+    color: hsl(var(--better-gray));
+  }
+  .text-better-white {
+    color: hsl(var(--better-baby-powder));
+  }
+  .text-better-green {
+    color: hsl(var(--better-yellow-green));
+  }
+}

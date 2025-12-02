@@ -1,6 +1,6 @@
-# TEACH Platform - Calculadora de Preços
+# Plano Educacional Santa Catarina - Calculadora de Preços
 
-Ferramenta interativa para gerar propostas comerciais dos cursos de IA para educadores da plataforma TEACH.
+Ferramenta interativa para gerar propostas comerciais do Plano Educacional Santa Catarina com roadmap de implementação por fases.
 
 ## 🎯 Funcionalidades
 
